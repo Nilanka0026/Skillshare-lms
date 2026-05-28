@@ -1,0 +1,74 @@
+const Course = require('../models/Course');
+const Order = require('../models/Order');
+const User = require('../models/User');
+const asyncHandler = require('../utils/asyncHandler');
+
+const createOrder = asyncHandler(async (req, res) => {
+  const { courseId, paymentProvider = 'manual' } = req.body;
+  const course = await Course.findById(courseId);
+
+  if (!course) {
+    res.status(404);
+    throw new Error('Course not found');
+  }
+
+  const order = await Order.create({
+    amount: course.price,
+    courseId: course._id,
+    paymentProvider,
+    paymentStatus: 'pending',
+    userId: req.user._id
+  });
+
+  res.status(201).json({
+    order,
+    paymentPreparation: {
+      stripeReady: paymentProvider === 'stripe',
+      payHereReady: paymentProvider === 'payhere',
+      message: 'Order created. Connect Stripe or PayHere payment intent/session logic here.'
+    }
+  });
+});
+
+const markOrderPaid = asyncHandler(async (req, res) => {
+  const { transactionId } = req.body;
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+
+  order.paymentStatus = 'paid';
+  order.transactionId = transactionId || `manual-${Date.now()}`;
+  await order.save();
+
+  await User.findByIdAndUpdate(order.userId, {
+    $addToSet: { enrolledCourses: order.courseId }
+  });
+
+  await Course.findByIdAndUpdate(order.courseId, {
+    $addToSet: { studentsEnrolled: order.userId }
+  });
+
+  res.json(order);
+});
+
+const getMyOrders = asyncHandler(async (req, res) => {
+  const orders = await Order.find({ userId: req.user._id })
+    .populate('courseId', 'title thumbnail price')
+    .sort({ createdAt: -1 });
+
+  res.json(orders);
+});
+
+const getAllOrders = asyncHandler(async (req, res) => {
+  const orders = await Order.find()
+    .populate('userId', 'name email')
+    .populate('courseId', 'title price')
+    .sort({ createdAt: -1 });
+
+  res.json(orders);
+});
+
+module.exports = { createOrder, getAllOrders, getMyOrders, markOrderPaid };

@@ -1,0 +1,14 @@
+export { AboutPage } from './public/AboutPage.jsx';
+export { AuthPage } from './public/AuthPage.jsx';
+export { CheckoutPage } from './public/CheckoutPage.jsx';
+export { ContactPage } from './public/ContactPage.jsx';
+export { CourseDetailsPage } from './public/CourseDetailsPage.jsx';
+export { CourseListingPage } from './public/CourseListingPage.jsx';
+export { ErrorPage } from './public/ErrorPage.jsx';
+export { FaqPage } from './public/FaqPage.jsx';
+export { HomePage } from './public/HomePage.jsx';
+export { InstructorProfilePage } from './public/InstructorProfilePage.jsx';
+export { LegalPage } from './public/LegalPage.jsx';
+export { SimplePage } from './public/SimplePage.jsx';
+export { DashboardPage } from './dashboard/DashboardPage.jsx';
+export { Register } from './Register.jsx';
