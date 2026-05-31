@@ -14,7 +14,15 @@ export const courseApi = {
   details: (id) => courseService.details(id),
   myCourses: () => courseService.myCourses(),
   create: (payload) => courseService.create(payload),
-  remove: (id) => courseService.remove(id)
+  remove: (id) => courseService.remove(id),
+  
+  // Teacher functions
+  teacherCourses: () => courseService.teacherCourses(),
+  teacherCreate: (payload) => courseService.teacherCreate(payload),
+  teacherUpdate: (id, payload) => courseService.teacherUpdate(id, payload),
+  teacherRemove: (id) => courseService.teacherRemove(id),
+  teacherStudents: (courseId) => courseService.teacherStudents(courseId),
+  teacherAnalytics: () => courseService.teacherAnalytics()
 };
 
 export const orderApi = {
@@ -25,5 +33,11 @@ export const orderApi = {
 
 export const userApi = {
   list: () => adminService.getUsers(),
-  remove: (id) => adminService.deleteUser(id)
+  remove: (id) => adminService.deleteUser(id),
+  
+  // Category management
+  categoriesRaw: () => adminService.getRawCategories(),
+  categoryCreate: (payload) => adminService.categoryCreate(payload),
+  categoryUpdate: (id, payload) => adminService.categoryUpdate(id, payload),
+  categoryRemove: (id) => adminService.categoryRemove(id)
 };

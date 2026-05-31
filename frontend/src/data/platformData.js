@@ -74,7 +74,28 @@ export const courses = [
   }
 ];
 
-export const categories = ['Design', 'Development', 'Marketing', 'Business', 'Data', 'Photography'];
+export const categories = [
+  "Programming",
+  "Web Development",
+  "Mobile Development",
+  "Data Science",
+  "Artificial Intelligence",
+  "Machine Learning",
+  "Cyber Security",
+  "Cloud Computing",
+  "Networking",
+  "Electronics",
+  "Engineering",
+  "Business",
+  "Marketing",
+  "Finance",
+  "Design",
+  "Photography",
+  "Video Editing",
+  "Music",
+  "Language Learning",
+  "Personal Development"
+];
 
 export const instructors = [
   { name: 'Amira Jay', role: 'Product Design', students: '18.4k', courses: 12, rating: 4.9 },
@@ -92,7 +113,7 @@ export const faqs = [
   ['Can I learn at my own pace?', 'Yes. Courses are on demand and progress is saved automatically.'],
   ['Can instructors publish paid courses?', 'Yes. The frontend is ready for course pricing and future payment integration.'],
   ['Which payment gateways are planned?', 'The checkout UI is prepared for Stripe and PayHere integration.'],
-  ['Is there a backend connected?', 'Not yet. This version uses mock data and fake authentication state.']
+  ['Is there a backend connected?', 'Yes, this version is connected to a live MERN stack Express and MongoDB database backend!']
 ];
 
 export const stats = [
@@ -105,24 +126,18 @@ export const stats = [
 export const studentLinks = [
   ['Overview', '/dashboard/student', LayoutDashboard],
   ['My Courses', '/dashboard/student/my-courses', BookOpen],
-  ['Continue Learning', '/dashboard/student/learning/product-design', GraduationCap],
-  ['Wishlist', '/dashboard/student/wishlist', Star],
-  ['Certificates', '/dashboard/student/certificates', ShieldCheck],
-  ['Notifications', '/dashboard/student/notifications', Users],
   ['Profile Settings', '/dashboard/student/profile', Settings]
 ];
 
-export const instructorLinks = [
-  ['Overview', '/dashboard/instructor', LayoutDashboard],
-  ['Create Course', '/dashboard/instructor/create-course', BookOpen],
-  ['Manage Courses', '/dashboard/instructor/courses', BriefcaseBusiness],
-  ['Upload Lessons', '/dashboard/instructor/lessons', GraduationCap],
-  ['Enrollments', '/dashboard/instructor/enrollments', Users],
-  ['Earnings', '/dashboard/instructor/earnings', CreditCard],
-  ['Analytics', '/dashboard/instructor/analytics', BarChart3],
-  ['Reviews', '/dashboard/instructor/reviews', Star],
-  ['Profile Settings', '/dashboard/instructor/profile', Settings]
+export const teacherLinks = [
+  ['Overview', '/dashboard/teacher', LayoutDashboard],
+  ['Create Course', '/dashboard/teacher/create-course', BookOpen],
+  ['Manage Courses', '/dashboard/teacher/courses', BriefcaseBusiness],
+  ['Analytics', '/dashboard/teacher/analytics', BarChart3],
+  ['Profile Settings', '/dashboard/teacher/profile', Settings]
 ];
+
+export const instructorLinks = teacherLinks;
 
 export const adminLinks = [
   ['Overview', '/dashboard/admin', LayoutDashboard],

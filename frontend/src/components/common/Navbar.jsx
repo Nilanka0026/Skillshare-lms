@@ -26,51 +26,39 @@ export function Navbar({ onOpenMenu }) {
           <NavLink to="/" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
             Home
           </NavLink>
-
-          {!isAuthenticated && (
-            <>
-              <NavLink to="/courses" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
-                Courses
-              </NavLink>
-              <NavLink to="/about" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
-                About
-              </NavLink>
-              <NavLink to="/contact" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
-                Contact
-              </NavLink>
-            </>
+          <NavLink to="/courses" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
+            Explore Courses
+          </NavLink>
+          {(!isAuthenticated || user?.role !== 'student') && (
+            <NavLink to="/teachers" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
+              Teachers
+            </NavLink>
           )}
+          <NavLink to="/about" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
+            About
+          </NavLink>
+          <NavLink to="/contact" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
+            Contact
+          </NavLink>
 
           {isAuthenticated && user?.role === 'student' && (
             <>
-              <NavLink to="/courses" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
-                Explore Courses
-              </NavLink>
               <NavLink to="/dashboard/student/my-courses" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
                 My Learning
               </NavLink>
               <NavLink to="/dashboard/student" end className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
-                Dashboard
-              </NavLink>
-              <NavLink to="/dashboard/student/profile" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
-                Profile
+                Student Dashboard
               </NavLink>
             </>
           )}
 
           {isAuthenticated && user?.role === 'instructor' && (
             <>
-              <NavLink to="/courses" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
-                Explore Courses
+              <NavLink to="/dashboard/teacher" end className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
+                Teacher Dashboard
               </NavLink>
-              <NavLink to="/dashboard/instructor" end className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
-                Instructor Dashboard
-              </NavLink>
-              <NavLink to="/dashboard/instructor/create-course" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
+              <NavLink to="/dashboard/teacher/create-course" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
                 Create Course
-              </NavLink>
-              <NavLink to="/dashboard/instructor/profile" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
-                Profile
               </NavLink>
             </>
           )}
@@ -79,12 +67,6 @@ export function Navbar({ onOpenMenu }) {
             <>
               <NavLink to="/dashboard/admin" end className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
                 Admin Dashboard
-              </NavLink>
-              <NavLink to="/dashboard/admin/users" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
-                Users
-              </NavLink>
-              <NavLink to="/dashboard/admin/courses" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
-                Courses
               </NavLink>
             </>
           )}

@@ -43,12 +43,36 @@ const markOrderPaid = asyncHandler(async (req, res) => {
   order.transactionId = transactionId || `manual-${Date.now()}`;
   await order.save();
 
-  await User.findByIdAndUpdate(order.userId, {
-    $addToSet: { enrolledCourses: order.courseId }
+  const Enrollment = require('../models/Enrollment');
+  
+  // Check if already enrolled to prevent duplicates
+  const existingEnrollment = await Enrollment.findOne({
+    student: order.userId,
+    course: order.courseId
   });
 
-  await Course.findByIdAndUpdate(order.courseId, {
-    $addToSet: { studentsEnrolled: order.userId }
+  if (!existingEnrollment) {
+    await Enrollment.create({
+      student: order.userId,
+      course: order.courseId,
+      progress: 0,
+      completedLessons: [],
+      enrolledAt: new Date()
+    });
+
+    // Update Course: add student and increment enrollmentCount
+    await Course.findByIdAndUpdate(order.courseId, {
+      $addToSet: {
+        studentsEnrolled: order.userId,
+        enrolledStudents: order.userId
+      },
+      $inc: { enrollmentCount: 1 }
+    });
+  }
+
+  // Update User: add course
+  await User.findByIdAndUpdate(order.userId, {
+    $addToSet: { enrolledCourses: order.courseId }
   });
 
   res.json(order);

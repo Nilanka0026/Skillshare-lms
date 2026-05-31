@@ -56,6 +56,21 @@ export function CourseProvider({ children }) {
     }
   }, [fetchMyCourses]);
 
+  const unenrollFromCourse = useCallback(async (courseId) => {
+    setLoading(true);
+    setError('');
+    try {
+      const result = await enrollmentService.unenroll(courseId);
+      await fetchMyCourses();
+      return result;
+    } catch (apiError) {
+      setError(apiError.message);
+      throw apiError;
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchMyCourses]);
+
   const value = {
     courses,
     myCourses,
@@ -63,7 +78,8 @@ export function CourseProvider({ children }) {
     error,
     fetchCourses,
     fetchMyCourses,
-    enrollInCourse
+    enrollInCourse,
+    unenrollFromCourse
   };
 
   return <CourseContext.Provider value={value}>{children}</CourseContext.Provider>;

@@ -12,12 +12,12 @@ export function MobileMenu({ isOpen, onClose }) {
     onClose();
   };
 
-  // Dynamically build menu links based on role
   let menuLinks = [];
   if (!isAuthenticated) {
     menuLinks = [
       ['Home', '/'],
-      ['Courses', '/courses'],
+      ['Explore Courses', '/courses'],
+      ['Teachers', '/teachers'],
       ['About', '/about'],
       ['Contact', '/contact'],
       ['Login', '/login'],
@@ -28,23 +28,24 @@ export function MobileMenu({ isOpen, onClose }) {
       ['Home', '/'],
       ['Explore Courses', '/courses'],
       ['My Learning', '/dashboard/student/my-courses'],
-      ['Dashboard', '/dashboard/student'],
-      ['Profile', '/dashboard/student/profile']
+      ['Student Dashboard', '/dashboard/student'],
+      ['Profile Settings', '/dashboard/student/profile']
     ];
   } else if (user?.role === 'instructor') {
     menuLinks = [
       ['Home', '/'],
       ['Explore Courses', '/courses'],
-      ['Instructor Dashboard', '/dashboard/instructor'],
-      ['Create Course', '/dashboard/instructor/create-course'],
-      ['Profile', '/dashboard/instructor/profile']
+      ['Teachers', '/teachers'],
+      ['Teacher Dashboard', '/dashboard/teacher'],
+      ['Create Course', '/dashboard/teacher/create-course'],
+      ['Profile Settings', '/dashboard/teacher/profile']
     ];
   } else if (user?.role === 'admin') {
     menuLinks = [
       ['Home', '/'],
-      ['Admin Dashboard', '/dashboard/admin'],
-      ['Users', '/dashboard/admin/users'],
-      ['Courses', '/dashboard/admin/courses']
+      ['Explore Courses', '/courses'],
+      ['Teachers', '/teachers'],
+      ['Admin Dashboard', '/dashboard/admin']
     ];
   }
 

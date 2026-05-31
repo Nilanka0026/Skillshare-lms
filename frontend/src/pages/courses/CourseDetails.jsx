@@ -1,23 +1,38 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { CheckCircle2, Star } from 'lucide-react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { CheckCircle2, Star, BookOpen, Users, Award } from 'lucide-react';
 import { CourseCard } from '../../components/common/CourseCard.jsx';
 import { ReviewCard } from '../../components/common/ReviewCard.jsx';
 import { courses } from '../../data/platformData.js';
 import { courseApi } from '../../services/api.js';
 import { formatCurrency } from '../../utils/formatters.js';
+import { useCourse } from '../../context/CourseContext.jsx';
+import { useAuth } from '../../context/useAuth.js';
 
 export function CourseDetails() {
   const { courseId } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+  const { myCourses, enrollInCourse, fetchMyCourses } = useCourse();
+
   const fallbackCourse = courses.find((item) => item.id === courseId) || courses[0];
   const [apiPayload, setApiPayload] = useState(null);
   const [apiError, setApiError] = useState('');
+  const [enrolling, setEnrolling] = useState(false);
+  const [enrollError, setEnrollError] = useState('');
 
   useEffect(() => {
     courseApi.details(courseId)
       .then((data) => setApiPayload(data))
       .catch((error) => setApiError(error.message));
   }, [courseId]);
+
+  // Proactively fetch student courses list if logged in to sync enrollment status
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'student') {
+      fetchMyCourses().catch(() => {});
+    }
+  }, [isAuthenticated, user, fetchMyCourses]);
 
   const course = apiPayload?.course || fallbackCourse;
   const reviews = apiPayload?.reviews || [];
@@ -26,9 +41,42 @@ export function CourseDetails() {
   const lessonItems = course.lessons?.length ? course.lessons : fallbackCourse.lessons;
   const rating = typeof course.ratings === 'object' ? course.ratings?.average || 0 : course.rating;
   const reviewCount = typeof course.ratings === 'object' ? course.ratings?.count || reviews.length : course.reviews;
-  const studentCount = course.students || course.studentsEnrolled?.length || 0;
+  const studentCount = course.students || course.studentsEnrolled?.length || course.enrollmentCount || 0;
   const thumbnail = course.thumbnail || course.image;
   const relatedCourses = courses.filter((item) => item.id !== fallbackCourse.id).slice(0, 3);
+
+  const isEnrolled = myCourses.some((item) => (item._id || item.id) === courseIdForLinks);
+
+  const handleEnrollment = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    if (user?.role !== 'student') {
+      setEnrollError('Only students can enroll in courses.');
+      return;
+    }
+
+    // IF PAID COURSE: Go to checkout / payment process
+    if (course.price > 0) {
+      navigate(`/checkout/${courseIdForLinks}`);
+      return;
+    }
+
+    // IF FREE COURSE: Enroll immediately!
+    setEnrolling(true);
+    setEnrollError('');
+
+    try {
+      await enrollInCourse(courseIdForLinks);
+      navigate('/dashboard/student/my-courses');
+    } catch (err) {
+      setEnrollError(err.message || 'Enrollment failed. Please try again.');
+    } finally {
+      setEnrolling(false);
+    }
+  };
 
   return (
     <section className="bg-white">
@@ -40,7 +88,7 @@ export function CourseDetails() {
             <p className="mt-4 text-lg leading-8 text-gray-600">{course.description}</p>
             {apiError && <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">Backend detail unavailable: {apiError}. Showing mock detail.</p>}
             <div className="mt-5 flex flex-wrap gap-4 text-sm text-gray-600">
-              <span className="flex items-center gap-1"><Star size={16} className="text-amber-500" /> {rating || 'New'} ({reviewCount || 0} reviews)</span>
+              <span className="flex items-center gap-1.5"><Star size={16} className="text-amber-500 fill-amber-500" /> {rating || 'New'} ({reviewCount || 0} reviews)</span>
               <span>{studentCount.toLocaleString()} students</span>
               <span>{course.level || 'All levels'}</span>
               <span>{course.duration || 'Self-paced'}</span>
@@ -56,6 +104,38 @@ export function CourseDetails() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Teacher Biography Section */}
+            <div className="mt-10 rounded-2xl border border-gray-200 bg-gray-50 p-6">
+              <h2 className="text-2xl font-black text-gray-950 mb-4">About the Teacher</h2>
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <div className="grid h-16 w-16 place-items-center rounded-2xl bg-blue-600 text-xl font-black text-white">
+                  {typeof course.instructor === 'object' && course.instructor?.profileImage ? (
+                    <img
+                      src={course.instructor.profileImage}
+                      alt={instructorName}
+                      className="h-full w-full rounded-2xl object-cover"
+                    />
+                  ) : (
+                    (instructorName || 'T')[0]
+                  )}
+                </div>
+                <div>
+                  <Link
+                    to={`/teachers/${typeof course.instructor === 'object' ? course.instructor?._id : course.instructor}`}
+                    className="text-lg font-black text-blue-600 hover:underline"
+                  >
+                    {instructorName || 'SkillShare Instructor'}
+                  </Link>
+                  <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mt-0.5">
+                    {typeof course.instructor === 'object' && course.instructor?.experience ? course.instructor.experience : 'Expert Educator'}
+                  </p>
+                </div>
+              </div>
+              <p className="mt-4 text-sm leading-6 text-gray-600">
+                {typeof course.instructor === 'object' && course.instructor?.bio ? course.instructor.bio : 'This instructor has a rich background teaching students worldwide, helping thousands of candidates launch successful tech, engineering, design, and marketing careers.'}
+              </p>
             </div>
 
             <div className="mt-10">
@@ -80,9 +160,29 @@ export function CourseDetails() {
               <span className="text-sm text-gray-500">Lifetime access</span>
             </div>
             <p className="mt-4 text-sm text-gray-600">Instructor: <strong>{instructorName || 'SkillShare Instructor'}</strong></p>
-            <Link to={`/checkout/${courseIdForLinks}`} className="mt-5 inline-flex w-full justify-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">
-              Buy Course
-            </Link>
+
+            {enrollError && (
+              <p className="mt-3 rounded-lg bg-red-50 p-3 text-xs font-bold text-red-600">
+                {enrollError}
+              </p>
+            )}
+
+            {isEnrolled ? (
+              <Link
+                to="/dashboard/student/my-courses"
+                className="mt-5 inline-flex w-full justify-center rounded-xl bg-green-600 px-5 py-3 font-semibold text-white hover:bg-green-700 text-center"
+              >
+                Continue Learning
+              </Link>
+            ) : (
+              <button
+                onClick={handleEnrollment}
+                disabled={enrolling}
+                className="mt-5 inline-flex w-full justify-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {enrolling ? 'Enrolling...' : course.price > 0 ? 'Buy Course' : 'Enroll in Course'}
+              </button>
+            )}
           </aside>
         </div>
 

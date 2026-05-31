@@ -4,7 +4,7 @@ import { authApi } from '../services/api.js';
 
 const roleHome = {
   student: '/dashboard/student',
-  instructor: '/dashboard/instructor',
+  instructor: '/dashboard/teacher',
   admin: '/dashboard/admin'
 };
 

@@ -35,6 +35,24 @@ const userSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course'
       }
+    ],
+    bio: {
+      type: String,
+      default: ''
+    },
+    skills: {
+      type: [String],
+      default: []
+    },
+    experience: {
+      type: String,
+      default: ''
+    },
+    createdCourses: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course'
+      }
     ]
   },
   {

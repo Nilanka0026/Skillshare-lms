@@ -29,6 +29,11 @@ app.use('/api/enroll', require('./routes/enrollmentRoutes'));
 app.use('/api/instructor', require('./routes/instructorRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 
+app.use('/api/categories', require('./routes/categoryRoutes'));
+app.use('/api/teachers', require('./routes/teacherPublicRoutes'));
+app.use('/api/teacher', require('./routes/teacherDashboardRoutes'));
+app.use('/api/student', require('./routes/studentDashboardRoutes'));
+
 app.use(notFound);
 app.use(errorHandler);
 
