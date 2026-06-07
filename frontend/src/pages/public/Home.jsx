@@ -17,7 +17,7 @@ export function Home() {
               Learn practical skills from top instructors.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600">
-              A complete frontend-only SkillShare platform with student, instructor, admin, course, payment, and learning flows.
+              The Engineering Skill Sharing Platform connects students and staff across all engineering departments to learn, teach, and grow together.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/courses" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700">

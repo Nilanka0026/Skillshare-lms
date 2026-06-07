@@ -111,9 +111,9 @@ export const testimonials = [
 
 export const faqs = [
   ['Can I learn at my own pace?', 'Yes. Courses are on demand and progress is saved automatically.'],
-  ['Can instructors publish paid courses?', 'Yes. The frontend is ready for course pricing and future payment integration.'],
-  ['Which payment gateways are planned?', 'The checkout UI is prepared for Stripe and PayHere integration.'],
-  ['Is there a backend connected?', 'Yes, this version is connected to a live MERN stack Express and MongoDB database backend!']
+  ['Can instructors publish paid courses?', 'Yes. Instructors can set their own pricing and earn revenue from their courses.'],
+  ['Can I access course materials at any time?', 'Yes. All course content is available 24/7 through your dashboard.'],
+  ['Can I download course materials?', 'This depends on the instructors settings. Some materials may be available for download while others are view-only.']
 ];
 
 export const stats = [
