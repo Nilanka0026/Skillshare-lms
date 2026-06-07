@@ -4,8 +4,8 @@ export function About() {
       <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
         <h1 className="text-4xl font-black text-gray-950">About SkillShare</h1>
         <p className="mt-6 text-lg leading-8 text-gray-600">
-          SkillShare is a frontend-ready e-learning marketplace built for guests, students, instructors, and admins.
-          It uses mock data and fake auth now, with a clean structure for future MERN backend integration.
+          The Engineering Skill Sharing Platform connects students and staff across all engineering departments to learn, teach, and grow together.
+          Through shared skills, workshops, and mentorship, it fosters collaboration, innovation, and continuous learning beyond the classroom.
         </p>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {['Course marketplace', 'Role dashboards', 'Payment-ready flow'].map((item) => (
