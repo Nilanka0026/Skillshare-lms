@@ -113,7 +113,7 @@ export const faqs = [
   ['Can I learn at my own pace?', 'Yes. Courses are on demand and progress is saved automatically.'],
   ['Can instructors publish paid courses?', 'Yes. The frontend is ready for course pricing and future payment integration.'],
   ['Which payment gateways are planned?', 'The checkout UI is prepared for Stripe and PayHere integration.'],
-  ['Is there a backend connected?', 'Yes, this version is connected to a live MERN stack Express and MongoDB database backend!']
+  ['Can I refund a course?', 'Refund availability depends on the platform policy and purchase age.']
 ];
 
 export const stats = [
