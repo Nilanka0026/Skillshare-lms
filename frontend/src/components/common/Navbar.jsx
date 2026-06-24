@@ -40,6 +40,11 @@ export function Navbar({ onOpenMenu }) {
           <NavLink to="/contact" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
             Contact
           </NavLink>
+          {isAuthenticated && (
+            <NavLink to="/chatbot" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
+              Chatbot
+            </NavLink>
+          )}
 
           {isAuthenticated && user?.role === 'student' && (
             <>

@@ -5,6 +5,7 @@ import { PublicLayout } from '../layouts/PublicLayout.jsx';
 import { ProtectedRoute } from './ProtectedRoute.jsx';
 import { RoleBasedRoute } from './RoleBasedRoute.jsx';
 import { About } from '../pages/public/About.jsx';
+import { ChatbotPage } from '../pages/public/ChatbotPage.jsx';
 import { Contact } from '../pages/public/Contact.jsx';
 import { CourseDetails } from '../pages/courses/CourseDetails.jsx';
 import { Courses } from '../pages/courses/Courses.jsx';
@@ -57,6 +58,7 @@ export function AppRoutes() {
           <Route path="payment/processing" element={<PaymentProcessing />} />
           <Route path="payment/success" element={<PaymentSuccess />} />
           <Route path="payment/failed" element={<PaymentFailed />} />
+          <Route path="chatbot" element={<ChatbotPage />} />
         </Route>
 
         {/* Student Dashboard (Nested inside PublicLayout so it has header/footer) */}
