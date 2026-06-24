@@ -27,6 +27,7 @@ export function MobileMenu({ isOpen, onClose }) {
     menuLinks = [
       ['Home', '/'],
       ['Explore Courses', '/courses'],
+      ['Chatbot', '/chatbot'],
       ['My Learning', '/dashboard/student/my-courses'],
       ['Student Dashboard', '/dashboard/student'],
       ['Profile Settings', '/dashboard/student/profile']
@@ -36,6 +37,7 @@ export function MobileMenu({ isOpen, onClose }) {
       ['Home', '/'],
       ['Explore Courses', '/courses'],
       ['Teachers', '/teachers'],
+      ['Chatbot', '/chatbot'],
       ['Teacher Dashboard', '/dashboard/teacher'],
       ['Create Course', '/dashboard/teacher/create-course'],
       ['Profile Settings', '/dashboard/teacher/profile']
@@ -45,6 +47,7 @@ export function MobileMenu({ isOpen, onClose }) {
       ['Home', '/'],
       ['Explore Courses', '/courses'],
       ['Teachers', '/teachers'],
+      ['Chatbot', '/chatbot'],
       ['Admin Dashboard', '/dashboard/admin']
     ];
   }
