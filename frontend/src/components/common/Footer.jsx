@@ -7,7 +7,7 @@ export function Footer() {
         <div>
           <h2 className="text-xl font-black text-white">SkillShare</h2>
           <p className="mt-3 max-w-md text-sm leading-6 text-gray-300">
-            A premium learning marketplace for students, teachers, and platform admins to collaborate.
+            A premium learning marketplace for students, teachers, and platform admins to collaborate together.
           </p>
         </div>
         <div className="flex flex-wrap gap-6 text-sm font-semibold text-gray-300 items-center">
