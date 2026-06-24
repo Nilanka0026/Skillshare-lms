@@ -111,13 +111,9 @@ export const testimonials = [
 
 export const faqs = [
   ['Can I learn at my own pace?', 'Yes. Courses are on demand and progress is saved automatically.'],
- upeka
   ['Can instructors publish paid courses?', 'Yes. The frontend is ready for course pricing and future payment integration.'],
   ['Which payment gateways are planned?', 'The checkout UI is prepared for Stripe and PayHere integration.'],
   ['Can I refund a course?', 'Refund availability depends on the platform policy and purchase age.']
-
-  
- main
 ];
 
 export const stats = [
