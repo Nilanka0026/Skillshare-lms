@@ -33,6 +33,7 @@ app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/teachers', require('./routes/teacherPublicRoutes'));
 app.use('/api/teacher', require('./routes/teacherDashboardRoutes'));
 app.use('/api/student', require('./routes/studentDashboardRoutes'));
+app.use('/api/chatbot', require('./routes/chatbotRoutes')); // Gemini Chatbot route
 
 app.use(notFound);
 app.use(errorHandler);

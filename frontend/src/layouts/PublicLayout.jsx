@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Footer } from '../components/common/Footer.jsx';
 import { MobileMenu } from '../components/common/MobileMenu.jsx';
 import { Navbar } from '../components/common/Navbar.jsx';
+import { ChatbotWidget } from '../components/common/ChatbotWidget.jsx';
 
 export function PublicLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -15,6 +16,7 @@ export function PublicLayout() {
         <Outlet />
       </main>
       <Footer />
+      <ChatbotWidget />
     </div>
   );
 }
