@@ -41,3 +41,10 @@ export const userApi = {
   categoryUpdate: (id, payload) => adminService.categoryUpdate(id, payload),
   categoryRemove: (id) => adminService.categoryRemove(id)
 };
+
+export const chatbotApi = {
+  getHistory: () => apiClient.get('/chatbot/history'),
+  sendMessage: (message) => apiClient.post('/chatbot/message', { message }),
+  clearHistory: () => apiClient.delete('/chatbot/history')
+};
+
