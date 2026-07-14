@@ -53,15 +53,6 @@ export function Home() {
               style={{ color: '#d1d5db' }}
             >
               The Engineering Skill Sharing Platform connects students and staff across all engineering departments to learn, teach, and grow together.
-      <section className="bg-white dark:bg-gray-950 transition-colors duration-300">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_0.9fr] lg:px-8 lg:py-24">
-          <div>
-            <span className="rounded-full bg-blue-50 dark:bg-blue-950/40 px-4 py-2 text-sm font-bold text-blue-700 dark:text-blue-400">Modern e-learning marketplace</span>
-            <h1 className="mt-6 max-w-3xl text-5xl font-black tracking-tight text-gray-950 dark:text-white sm:text-6xl">
-              Learn practical skills from top instructors.
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300">
-              Join thousands of learners and instructors on our platform. Explore courses, share knowledge, and grow your skills in a vibrant community.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link 
@@ -80,17 +71,9 @@ export function Home() {
                   color: '#ffffff' 
                 }}
               >
-              <Link to="/register" className="inline-flex min-h-12 items-center rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-3 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 Become an Instructor
               </Link>
             </div>
-          </div>
-          <div className="rounded-3xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 p-3 shadow-sm transition-colors">
-            <img
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=85"
-              alt="Students learning together"
-              className="h-[420px] w-full rounded-2xl object-cover"
-            />
           </div>
         </div>
       </section>
