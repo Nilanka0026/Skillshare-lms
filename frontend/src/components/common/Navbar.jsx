@@ -1,18 +1,13 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { BookOpen, LogOut, Menu, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../../context/useAuth.js';
-<<<<<<< Updated upstream
 import { useTheme } from '../../context/ThemeContext.jsx';
-=======
-import { useTheme } from '../../context/useTheme.js';
->>>>>>> Stashed changes
 import { Button } from './Button.jsx';
 
 export function Navbar({ onOpenMenu }) {
   const { isAuthenticated, logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = () => {
     logout();
@@ -88,8 +83,6 @@ export function Navbar({ onOpenMenu }) {
             </>
           )}
         </nav>
-
-<<<<<<< Updated upstream
         <div className="ml-auto flex items-center gap-3">
           {/* Theme Toggle Button */}
           <button
@@ -111,20 +104,6 @@ export function Navbar({ onOpenMenu }) {
                 onClick={handleLogout}
                 className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-950 dark:hover:text-white transition-colors cursor-pointer"
               >
-=======
-        <div className="ml-auto hidden items-center gap-3 lg:flex">
-          <button
-            onClick={toggleTheme}
-            className="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-950 transition-colors cursor-pointer"
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? <Sun size={19} className="text-yellow-500" /> : <Moon size={19} />}
-          </button>
-
-          {isAuthenticated ? (
-            <>
-              <button onClick={handleLogout} className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-950 cursor-pointer">
->>>>>>> Stashed changes
                 <LogOut size={17} />
                 Logout
               </button>
@@ -143,24 +122,12 @@ export function Navbar({ onOpenMenu }) {
             )}
           </div>
 
-<<<<<<< Updated upstream
           {/* Mobile Menu Toggle */}
           <button
             className="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900/50 hover:text-gray-950 dark:hover:text-white lg:hidden transition-colors cursor-pointer"
             onClick={onOpenMenu}
             aria-label="Open menu"
           >
-=======
-        <div className="ml-auto flex items-center gap-2 lg:hidden">
-          <button
-            onClick={toggleTheme}
-            className="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-950 transition-colors cursor-pointer"
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? <Sun size={19} className="text-yellow-500" /> : <Moon size={19} />}
-          </button>
-          <button className="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 cursor-pointer" onClick={onOpenMenu} aria-label="Open menu">
->>>>>>> Stashed changes
             <Menu size={20} />
           </button>
         </div>

@@ -2,8 +2,6 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-<<<<<<< Updated upstream
-=======
 @theme {
   --color-white: var(--color-custom-white);
   --color-gray-50: var(--color-custom-gray-50);
@@ -18,8 +16,6 @@
   --color-gray-900: var(--color-custom-gray-900);
   --color-gray-950: var(--color-custom-gray-950);
 }
-
->>>>>>> Stashed changes
 :root {
   --color-custom-white: #ffffff;
   --color-custom-gray-50: #f9fafb;
@@ -70,16 +66,6 @@
 body {
   min-width: 320px;
   margin: 0;
-<<<<<<< Updated upstream
-  background: #ffffff;
-  color: #111827;
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-body.dark {
-  background: #0b0f19;
-  color: #f3f4f6;
-=======
   background: var(--color-custom-white);
   color: var(--color-custom-gray-900);
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
@@ -87,7 +73,6 @@ body.dark {
 
 .dark body {
   background: var(--color-custom-gray-50);
->>>>>>> Stashed changes
 }
 
 button,

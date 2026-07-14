@@ -16,7 +16,8 @@ export function Home() {
             <h1 className="mt-6 max-w-3xl text-5xl font-black tracking-tight text-gray-950 dark:text-white sm:text-6xl">
               Learn practical skills from top instructors.
             </h1>
- main
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600 dark:text-gray-300">
+              Join thousands of learners and instructors on our platform. Explore courses, share knowledge, and grow your skills in a vibrant community.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/courses" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700">
