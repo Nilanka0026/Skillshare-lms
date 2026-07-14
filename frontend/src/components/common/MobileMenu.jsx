@@ -54,21 +54,21 @@ export function MobileMenu({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-gray-950/30 lg:hidden">
-      <aside className="ml-auto h-full w-80 max-w-[88vw] bg-white p-5 shadow-2xl">
+      <aside className="ml-auto h-full w-80 max-w-[88vw] bg-white dark:bg-gray-950 border-l border-transparent dark:border-gray-800 p-5 shadow-2xl transition-colors duration-300 text-gray-900 dark:text-white">
         <div className="flex items-center justify-between">
           <span className="text-lg font-black">SkillShare</span>
-          <button className="grid h-10 w-10 place-items-center rounded-xl border border-gray-200" onClick={onClose} aria-label="Close menu">
+          <button className="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900/50" onClick={onClose} aria-label="Close menu">
             <X size={20} />
           </button>
         </div>
         <nav className="mt-8 grid gap-2">
           {menuLinks.map(([label, path]) => (
-            <Link key={path} to={path} onClick={onClose} className="rounded-xl px-4 py-3 font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-950">
+            <Link key={path} to={path} onClick={onClose} className="rounded-xl px-4 py-3 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900/50 hover:text-gray-950 dark:hover:text-white transition-colors">
               {label}
             </Link>
           ))}
           {isAuthenticated && (
-            <button onClick={handleLogout} className="rounded-xl px-4 py-3 text-left font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-950">
+            <button onClick={handleLogout} className="rounded-xl px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900/50 hover:text-gray-950 dark:hover:text-white transition-colors">
               Logout
             </button>
           )}
