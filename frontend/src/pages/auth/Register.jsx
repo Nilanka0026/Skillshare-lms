@@ -56,7 +56,6 @@ export function Register() {
     
     if (values.role === 'instructor') {
       if (!instructorIdBase64) nextErrors.instructorId = 'Instructor ID document is required.';
-      if (!qualificationBase64) nextErrors.qualification = 'Degree or Qualification certificate is required.';
     }
     return nextErrors;
   };
@@ -125,7 +124,7 @@ export function Register() {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-gray-700">Degree or Qualification Certificate</label>
+              <label className="block text-xs font-bold text-gray-700">Degree or Qualification Certificate (Optional)</label>
               <div className="relative flex flex-col items-center justify-center border border-dashed border-blue-200 hover:border-blue-400 bg-white rounded-xl p-3 transition cursor-pointer group min-h-16">
                 <input 
                   type="file" 

@@ -24,9 +24,9 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   if (role === 'instructor') {
-    if (!verificationDocuments || !verificationDocuments.instructorId || !verificationDocuments.degreeQualifications) {
+    if (!verificationDocuments || !verificationDocuments.instructorId) {
       res.status(400);
-      throw new Error('Verification documents (ID and Qualification certificate) are required for instructor registration');
+      throw new Error('Instructor ID verification document is required for instructor registration');
     }
   }
 
@@ -45,7 +45,7 @@ const registerUser = asyncHandler(async (req, res) => {
     verificationStatus: role === 'instructor' ? 'pending' : 'none',
     verificationDocuments: role === 'instructor' ? {
       instructorId: verificationDocuments.instructorId,
-      degreeQualifications: verificationDocuments.degreeQualifications
+      degreeQualifications: verificationDocuments.degreeQualifications || ''
     } : undefined
   });
 
