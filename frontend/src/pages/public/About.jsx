@@ -11,7 +11,7 @@ export function About() {
           {['Course marketplace', 'Role dashboards', 'Payment-ready flow'].map((item) => (
             <article key={item} className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
               <h3 className="font-black text-gray-950">{item}</h3>
-              <p className="mt-2 text-sm leading-6 text-gray-600">Clean, scalable frontend modules for production growth.</p>
+              <p className="mt-2 text-sm leading-6 text-gray-600">Clean and and scalable modules for good production growth.</p>
             </article>
           ))}
         </div>
