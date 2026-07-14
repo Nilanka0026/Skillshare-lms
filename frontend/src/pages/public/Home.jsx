@@ -9,31 +9,71 @@ import { categories, courses, faqs, instructors, stats, testimonials } from '../
 export function Home() {
   return (
     <>
-      <section className="bg-white">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_0.9fr] lg:px-8 lg:py-24">
-          <div>
-            <span className="rounded-full bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700">Modern e-learning marketplace</span>
-            <h1 className="mt-6 max-w-3xl text-5xl font-black tracking-tight text-gray-950 sm:text-6xl">
+      <section 
+        className="relative overflow-hidden py-20 sm:py-24 lg:py-32 transition-colors duration-300"
+        style={{ backgroundColor: '#0b0f19' }}
+      >
+        {/* Background Video */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover opacity-45"
+        >
+          <source src="/hero-bg.mp4" type="video/mp4" />
+        </video>
+        
+        {/* Overlay to ensure high contrast and text readability */}
+        <div 
+          className="absolute inset-0" 
+          style={{ backgroundImage: 'linear-gradient(to top, #0b0f19 0%, rgba(11, 15, 25, 0.5) 50%, rgba(11, 15, 25, 0.8) 100%)' }}
+        />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <span 
+              className="rounded-full border px-4 py-2 text-sm font-bold animate-pulse"
+              style={{ 
+                backgroundColor: 'rgba(59, 130, 246, 0.2)', 
+                borderColor: 'rgba(59, 130, 246, 0.3)', 
+                color: '#60a5fa' 
+              }}
+            >
+              Modern e-learning marketplace
+            </span>
+            <h1 
+              className="mt-6 text-5xl font-black tracking-tight sm:text-6xl"
+              style={{ color: '#ffffff' }}
+            >
               Learn practical skills from top instructors.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600">
+            <p 
+              className="mt-6 text-lg leading-8"
+              style={{ color: '#d1d5db' }}
+            >
               The Engineering Skill Sharing Platform connects students and staff across all engineering departments to learn, teach, and grow together.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/courses" className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700">
-                Browse Courses <ArrowRight size={18} />
+              <Link 
+                to="/courses" 
+                className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold hover:bg-blue-700 transition-colors duration-200"
+                style={{ color: '#ffffff' }}
+              >
+                Browse Courses <ArrowRight size={18} style={{ color: '#ffffff' }} />
               </Link>
-              <Link to="/register" className="inline-flex min-h-12 items-center rounded-xl border border-gray-200 bg-white px-6 py-3 font-semibold text-gray-900 hover:bg-gray-50">
+              <Link 
+                to="/register" 
+                className="inline-flex min-h-12 items-center rounded-xl px-6 py-3 font-semibold transition-colors duration-200 hover:bg-[rgba(255,255,255,0.2)]"
+                style={{ 
+                  border: '1px solid rgba(255, 255, 255, 0.2)', 
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+                  color: '#ffffff' 
+                }}
+              >
                 Become an Instructor
               </Link>
             </div>
-          </div>
-          <div className="rounded-3xl border border-gray-200 bg-gray-50 p-3 shadow-sm">
-            <img
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=85"
-              alt="Students learning together"
-              className="h-[420px] w-full rounded-2xl object-cover"
-            />
           </div>
         </div>
       </section>
