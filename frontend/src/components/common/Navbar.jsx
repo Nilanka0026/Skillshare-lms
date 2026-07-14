@@ -48,7 +48,7 @@ export function Navbar({ onOpenMenu }) {
             Contact
           </NavLink>
           {isAuthenticated && (
-            <NavLink to="/chatbot" className={({ isActive }) => (isActive ? 'text-gray-950' : 'hover:text-gray-950')}>
+            <NavLink to="/chatbot" className={linkClass}>
               Chatbot
             </NavLink>
           )}
