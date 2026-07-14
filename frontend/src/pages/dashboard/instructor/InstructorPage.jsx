@@ -101,6 +101,35 @@ export function InstructorPage({ title, view }) {
     <div>
       <PageHeader title={title} />
       
+      {/* Verification status banners */}
+      {user?.verificationStatus === 'pending' && (
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-800 flex items-start gap-3 shadow-sm animate-in slide-in-from-top-4 duration-300">
+          <div className="mt-0.5 rounded-lg bg-amber-100 p-1.5 text-amber-600 flex-shrink-0">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-bold text-amber-900">Instructor Account Pending Verification</h4>
+            <p className="text-xs font-semibold mt-0.5 text-amber-800">Your profile is currently under review by our administration team. You will be able to create, publish, and manage courses as soon as your qualifications are approved.</p>
+          </div>
+        </div>
+      )}
+
+      {user?.verificationStatus === 'rejected' && (
+        <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-800 flex items-start gap-3 shadow-sm animate-in slide-in-from-top-4 duration-300">
+          <div className="mt-0.5 rounded-lg bg-rose-100 p-1.5 text-rose-600 flex-shrink-0">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-bold text-rose-900">Verification Application Rejected</h4>
+            <p className="text-xs font-semibold mt-0.5 text-rose-800">Unfortunately, the administration team could not verify your instructor documents. Please contact support at support@skillshare.test to update your credentials.</p>
+          </div>
+        </div>
+      )}
+
       {loading && <p className="mb-4 text-sm font-semibold text-gray-500">Processing teacher workspace...</p>}
       {error && (
         <div className="mb-4 flex justify-between items-center rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
@@ -118,23 +147,37 @@ export function InstructorPage({ title, view }) {
       {view === 'overview' && <Overview courses={courses} analytics={analytics} />}
       
       {view === 'create' && (
-        <CourseForm 
-          onCreated={() => {
-            setSuccess('Course published to platform successfully.');
-            loadDashboardData();
-          }} 
-          onError={setError} 
-        />
+        user?.verificationStatus === 'approved' ? (
+          <CourseForm 
+            onCreated={() => {
+              setSuccess('Course published to platform successfully.');
+              loadDashboardData();
+            }} 
+            onError={setError} 
+          />
+        ) : (
+          <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center max-w-xl mx-auto shadow-sm my-6">
+            <h3 className="text-lg font-black text-gray-900">Action Restricted</h3>
+            <p className="text-sm text-gray-500 mt-2">You cannot create or manage courses until your instructor application is approved by the platform administrator.</p>
+          </div>
+        )
       )}
 
       {view === 'courses' && !editMode && (
-        <CourseGrid 
-          courses={courses} 
-          onDeleteCourse={handleDeleteCourse} 
-          onTogglePublish={handleTogglePublish}
-          onEditCourse={handleEditClick}
-          onViewStudents={handleViewStudents}
-        />
+        user?.verificationStatus === 'approved' ? (
+          <CourseGrid 
+            courses={courses} 
+            onDeleteCourse={handleDeleteCourse} 
+            onTogglePublish={handleTogglePublish}
+            onEditCourse={handleEditClick}
+            onViewStudents={handleViewStudents}
+          />
+        ) : (
+          <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center max-w-xl mx-auto shadow-sm my-6">
+            <h3 className="text-lg font-black text-gray-900">Action Restricted</h3>
+            <p className="text-sm text-gray-500 mt-2">Course list and management features will unlock once your account has been verified.</p>
+          </div>
+        )
       )}
 
       {view === 'courses' && editMode && editingCourse && (

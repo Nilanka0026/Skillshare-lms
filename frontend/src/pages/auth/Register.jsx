@@ -15,6 +15,13 @@ export function Register() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  
+  // Document Upload States
+  const [instructorIdFile, setInstructorIdFile] = useState(null);
+  const [qualificationFile, setQualificationFile] = useState(null);
+  const [instructorIdBase64, setInstructorIdBase64] = useState('');
+  const [qualificationBase64, setQualificationBase64] = useState('');
+
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -25,6 +32,20 @@ export function Register() {
     setErrors((current) => ({ ...current, [event.target.name]: '' }));
   };
 
+  const handleFileChange = (event, setter, base64Setter, fieldName) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setter(file);
+    setErrors((current) => ({ ...current, [fieldName]: '' }));
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      base64Setter(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const validate = () => {
     const nextErrors = {};
     if (!values.fullName.trim()) nextErrors.fullName = 'Full name is required.';
@@ -32,6 +53,11 @@ export function Register() {
     if (values.password.length < 8) nextErrors.password = 'Password must be at least 8 characters.';
     if (values.password !== values.confirmPassword) nextErrors.confirmPassword = 'Passwords must match.';
     if (!values.role) nextErrors.role = 'Choose a role.';
+    
+    if (values.role === 'instructor') {
+      if (!instructorIdBase64) nextErrors.instructorId = 'Instructor ID document is required.';
+      if (!qualificationBase64) nextErrors.qualification = 'Degree or Qualification certificate is required.';
+    }
     return nextErrors;
   };
 
@@ -44,8 +70,15 @@ export function Register() {
     setLoading(true);
 
     try {
-      console.log('Registration data:', values);
-      await register(values);
+      const payload = { ...values };
+      if (values.role === 'instructor') {
+        payload.verificationDocuments = {
+          instructorId: instructorIdBase64,
+          degreeQualifications: qualificationBase64
+        };
+      }
+      console.log('Registration data:', payload);
+      await register(payload);
       navigate('/');
     } catch (error) {
       setApiError(error.message);
@@ -63,6 +96,57 @@ export function Register() {
         <PasswordField label="Password" name="password" value={values.password} onChange={handleChange} error={errors.password} visible={showPassword} onToggle={() => setShowPassword((current) => !current)} />
         <PasswordField label="Confirm Password" name="confirmPassword" value={values.confirmPassword} onChange={handleChange} error={errors.confirmPassword} visible={showConfirm} onToggle={() => setShowConfirm((current) => !current)} />
         <RoleSelector value={values.role} onChange={handleChange} error={errors.role} />
+        
+        {values.role === 'instructor' && (
+          <div className="grid gap-4 border border-blue-100 rounded-2xl bg-blue-50/50 p-4 transition-all duration-300">
+            <h3 className="text-sm font-bold text-blue-900 flex items-center gap-1.5">
+              <span>Verification Documents Required</span>
+            </h3>
+            
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-700">Instructor ID / Corporate ID Document</label>
+              <div className="relative flex flex-col items-center justify-center border border-dashed border-blue-200 hover:border-blue-400 bg-white rounded-xl p-3 transition cursor-pointer group min-h-16">
+                <input 
+                  type="file" 
+                  accept="image/*,application/pdf"
+                  onChange={(e) => handleFileChange(e, setInstructorIdFile, setInstructorIdBase64, 'instructorId')}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <span className="text-xs font-semibold text-gray-500 group-hover:text-blue-600 text-center">
+                  {instructorIdFile ? `Selected: ${instructorIdFile.name}` : "Click or Drag to Upload ID Document"}
+                </span>
+                {instructorIdFile && (
+                  <span className="mt-1 text-[10px] text-gray-400">
+                    ({(instructorIdFile.size / 1024).toFixed(1)} KB)
+                  </span>
+                )}
+              </div>
+              {errors.instructorId && <span className="block text-xs font-semibold text-red-600">{errors.instructorId}</span>}
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-700">Degree or Qualification Certificate</label>
+              <div className="relative flex flex-col items-center justify-center border border-dashed border-blue-200 hover:border-blue-400 bg-white rounded-xl p-3 transition cursor-pointer group min-h-16">
+                <input 
+                  type="file" 
+                  accept="image/*,application/pdf"
+                  onChange={(e) => handleFileChange(e, setQualificationFile, setQualificationBase64, 'qualification')}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <span className="text-xs font-semibold text-gray-500 group-hover:text-blue-600 text-center">
+                  {qualificationFile ? `Selected: ${qualificationFile.name}` : "Click or Drag to Upload Certificate"}
+                </span>
+                {qualificationFile && (
+                  <span className="mt-1 text-[10px] text-gray-400">
+                    ({(qualificationFile.size / 1024).toFixed(1)} KB)
+                  </span>
+                )}
+              </div>
+              {errors.qualification && <span className="block text-xs font-semibold text-red-600">{errors.qualification}</span>}
+            </div>
+          </div>
+        )}
+
         <Button disabled={loading}>{loading && <LoaderCircle className="animate-spin" size={18} />} Sign Up</Button>
       </form>
       <p className="mt-6 text-center text-sm text-gray-600">Already have an account? <Link className="font-bold text-blue-600" to="/login">Login</Link></p>
