@@ -34,6 +34,7 @@ export const orderApi = {
 export const userApi = {
   list: () => adminService.getUsers(),
   remove: (id) => adminService.deleteUser(id),
+  verifyInstructor: (id, status) => adminService.verifyInstructor(id, status),
   
   // Category management
   categoriesRaw: () => adminService.getRawCategories(),

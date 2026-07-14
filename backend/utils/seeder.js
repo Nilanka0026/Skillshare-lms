@@ -12,24 +12,24 @@ const seed = async () => {
   await connectDB();
 
   const student = await upsertDemoUser(
-    'Demo Student', 
-    'student@skillshare.test', 
+    'Demo Student',
+    'student@skillshare.test',
     'student',
     'Passionate learner exploring advanced web architectures.'
   );
 
   const instructor = await upsertDemoUser(
-    'Demo Instructor', 
-    'instructor@skillshare.test', 
+    'Instructor',
+    'instructor@skillshare.test',
     'instructor',
-    'Full-stack developer with 15+ years of software design experience. Tech educator and advisor.',
+    ' with 15+ years of software design experience. Tech educator and advisor.',
     ['Programming', 'Web Development', 'Cloud Computing', 'System Architectures'],
     'Senior Staff Software Engineer & Educator'
   );
 
   await upsertDemoUser(
-    'Demo Admin', 
-    'admin@skillshare.test', 
+    'Demo Admin',
+    'admin@skillshare.test',
     'admin'
   );
 
