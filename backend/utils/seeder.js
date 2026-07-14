@@ -19,7 +19,7 @@ const seed = async () => {
   );
 
   const instructor = await upsertDemoUser(
-    'Demo Instructor',
+    'Instructor',
     'instructor@skillshare.test',
     'instructor',
     ' with 15+ years of software design experience. Tech educator and advisor.',
