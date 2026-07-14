@@ -1,10 +1,66 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+<<<<<<< Updated upstream
+=======
+@theme {
+  --color-white: var(--color-custom-white);
+  --color-gray-50: var(--color-custom-gray-50);
+  --color-gray-100: var(--color-custom-gray-100);
+  --color-gray-200: var(--color-custom-gray-200);
+  --color-gray-300: var(--color-custom-gray-300);
+  --color-gray-400: var(--color-custom-gray-400);
+  --color-gray-500: var(--color-custom-gray-500);
+  --color-gray-600: var(--color-custom-gray-600);
+  --color-gray-700: var(--color-custom-gray-700);
+  --color-gray-800: var(--color-custom-gray-800);
+  --color-gray-900: var(--color-custom-gray-900);
+  --color-gray-950: var(--color-custom-gray-950);
+}
+
+>>>>>>> Stashed changes
 :root {
+  --color-custom-white: #ffffff;
+  --color-custom-gray-50: #f9fafb;
+  --color-custom-gray-100: #f3f4f6;
+  --color-custom-gray-200: #e5e7eb;
+  --color-custom-gray-300: #d1d5db;
+  --color-custom-gray-400: #9ca3af;
+  --color-custom-gray-500: #6b7280;
+  --color-custom-gray-600: #4b5563;
+  --color-custom-gray-700: #374151;
+  --color-custom-gray-800: #1f2937;
+  --color-custom-gray-900: #111827;
+  --color-custom-gray-950: #030712;
+
   color-scheme: light;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #ffffff;
-  color: #111827;
+  background: var(--color-custom-white);
+  color: var(--color-custom-gray-900);
+}
+
+:root.dark {
+  --color-custom-white: #1e293b; /* slate-800 */
+  --color-custom-gray-50: #0f172a; /* slate-900 */
+  --color-custom-gray-100: #1e293b; /* slate-800 */
+  --color-custom-gray-200: #334155; /* slate-700 */
+  --color-custom-gray-300: #475569; /* slate-600 */
+  --color-custom-gray-400: #64748b; /* slate-500 */
+  --color-custom-gray-500: #94a3b8; /* slate-400 */
+  --color-custom-gray-600: #cbd5e1; /* slate-300 */
+  --color-custom-gray-700: #e2e8f0; /* slate-200 */
+  --color-custom-gray-800: #f1f5f9; /* slate-100 */
+  --color-custom-gray-900: #f8fafc; /* slate-50 */
+  --color-custom-gray-950: #ffffff; /* white */
+
+  color-scheme: dark;
+}
+
+:root.dark {
+  color-scheme: dark;
+  background: #0b0f19;
+  color: #f3f4f6;
 }
 
 * {
@@ -14,8 +70,24 @@
 body {
   min-width: 320px;
   margin: 0;
+<<<<<<< Updated upstream
   background: #ffffff;
   color: #111827;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark {
+  background: #0b0f19;
+  color: #f3f4f6;
+=======
+  background: var(--color-custom-white);
+  color: var(--color-custom-gray-900);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.dark body {
+  background: var(--color-custom-gray-50);
+>>>>>>> Stashed changes
 }
 
 button,
@@ -28,4 +100,78 @@ textarea {
 img {
   display: block;
   max-width: 100%;
+}
+
+/* Dark theme global overrides for neutral utility classes */
+.dark {
+  /* Background overrides */
+  .bg-white, .bg-white\/95 {
+    background-color: #0b0f19 !important;
+  }
+  .bg-white\/5 {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+  }
+  .bg-white\/10 {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  .bg-gray-50, .bg-gray-50\/90, .bg-gray-50\/80 {
+    background-color: #111827 !important;
+  }
+  .bg-gray-100 {
+    background-color: #1f2937 !important;
+  }
+  
+  /* Text color overrides */
+  .text-gray-950 {
+    color: #ffffff !important;
+  }
+  .text-gray-900 {
+    color: #f3f4f6 !important;
+  }
+  .text-gray-800 {
+    color: #e5e7eb !important;
+  }
+  .text-gray-700 {
+    color: #d1d5db !important;
+  }
+  .text-gray-600 {
+    color: #9ca3af !important;
+  }
+  .text-gray-500 {
+    color: #9ca3af !important;
+  }
+  
+  /* Border color overrides */
+  .border-gray-200, 
+  .border-gray-100, 
+  .border-gray-150, 
+  .border-gray-250,
+  .border-gray-300 {
+    border-color: #1f2937 !important;
+  }
+
+  /* Hover states */
+  .hover\:bg-gray-50:hover {
+    background-color: #1f2937 !important;
+  }
+  .hover\:text-gray-950:hover {
+    color: #ffffff !important;
+  }
+
+  /* Form and inputs */
+  input, select, textarea {
+    background-color: #111827 !important;
+    color: #f3f4f6 !important;
+    border-color: #1f2937 !important;
+    
+    &::placeholder {
+      color: #6b7280 !important;
+    }
+  }
+
+  /* Options inside selects */
+  option {
+    background-color: #111827 !important;
+    color: #f3f4f6 !important;
+  }
 }

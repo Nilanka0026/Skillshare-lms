@@ -1,10 +1,12 @@
 import { Link, Outlet } from 'react-router-dom';
-import { Bell, Menu, Search } from 'lucide-react';
+import { Bell, Menu, Search, Sun, Moon } from 'lucide-react';
 import { Sidebar } from '../components/common/Sidebar.jsx';
 import { useAuth } from '../context/useAuth.js';
+import { useTheme } from '../context/useTheme.js';
 
 export function DashboardShell({ links, title }) {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-gray-50 lg:flex">
@@ -22,7 +24,14 @@ export function DashboardShell({ links, title }) {
             <Link to="/courses" className="hidden rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 md:inline-flex">
               Explore Courses
             </Link>
-            <button className="ml-auto grid h-10 w-10 place-items-center rounded-xl border border-gray-200" aria-label="Notifications">
+            <button
+              onClick={toggleTheme}
+              className="ml-auto grid h-10 w-10 place-items-center rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-950 transition-colors cursor-pointer"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun size={19} className="text-yellow-500" /> : <Moon size={19} />}
+            </button>
+            <button className="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 cursor-pointer" aria-label="Notifications">
               <Bell size={19} />
             </button>
             <div className="hidden text-right sm:block">
