@@ -40,7 +40,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     systemPrompt = `You are the AI Learning Assistant on SkillShare LMS. You help students find relevant courses, build weekly study schedules, explain concepts in simple terms, and offer learning tips. Structure your answers with clear markdown headers, bold text, lists, and short paragraphs. Keep it encouraging, engaging, and concise.`;
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = (process.env.GEMINI_API_KEY || '').trim();
 
   // 3. Fallback to Demo Mode if API Key is not set
   if (!apiKey) {

@@ -21,7 +21,47 @@ const getAllCourses = asyncHandler(async (req, res) => {
   res.json(courses);
 });
 
+// @desc    Verify instructor status
+// @route   PUT /api/admin/users/:id/verify
+// @access  Private (admin only)
+const verifyInstructor = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!['approved', 'rejected'].includes(status)) {
+    res.status(400);
+    throw new Error('Invalid verification status. Must be approved or rejected.');
+  }
+
+  const user = await User.findById(id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  if (user.role !== 'instructor') {
+    res.status(400);
+    throw new Error('User is not an instructor');
+  }
+
+  user.verificationStatus = status;
+  await user.save();
+
+  res.json({
+    message: `Instructor status updated to ${status}`,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      verificationStatus: user.verificationStatus
+    }
+  });
+});
+
 module.exports = {
   getAllUsers,
-  getAllCourses
+  getAllCourses,
+  verifyInstructor
 };

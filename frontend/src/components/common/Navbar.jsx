@@ -14,6 +14,11 @@ export function Navbar({ onOpenMenu }) {
     navigate('/');
   };
 
+  const linkClass = ({ isActive }) =>
+    isActive
+      ? 'text-gray-950 dark:text-white font-bold'
+      : 'text-gray-600 dark:text-gray-400 hover:text-gray-950 dark:hover:text-white transition-colors duration-200';
+
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur transition-colors duration-300">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6 lg:px-8">
@@ -44,6 +49,26 @@ export function Navbar({ onOpenMenu }) {
           </NavLink>
           {isAuthenticated && (
             <NavLink to="/chatbot" className={({ isActive }) => (isActive ? 'text-gray-950 dark:text-white font-bold' : 'hover:text-gray-950 dark:hover:text-white')}>
+        <nav className="hidden items-center gap-6 text-sm font-semibold lg:flex">
+          <NavLink to="/" className={linkClass}>
+            Home
+          </NavLink>
+          <NavLink to="/courses" className={linkClass}>
+            Explore Courses
+          </NavLink>
+          {(!isAuthenticated || user?.role !== 'student') && (
+            <NavLink to="/teachers" className={linkClass}>
+              Teachers
+            </NavLink>
+          )}
+          <NavLink to="/about" className={linkClass}>
+            About
+          </NavLink>
+          <NavLink to="/contact" className={linkClass}>
+            Contact
+          </NavLink>
+          {isAuthenticated && (
+            <NavLink to="/chatbot" className={linkClass}>
               Chatbot
             </NavLink>
           )}
@@ -54,6 +79,10 @@ export function Navbar({ onOpenMenu }) {
                 My Learning
               </NavLink>
               <NavLink to="/dashboard/student" end className={({ isActive }) => (isActive ? 'text-gray-950 dark:text-white font-bold' : 'hover:text-gray-950 dark:hover:text-white')}>
+              <NavLink to="/dashboard/student/my-courses" className={linkClass}>
+                My Learning
+              </NavLink>
+              <NavLink to="/dashboard/student" end className={linkClass}>
                 Student Dashboard
               </NavLink>
             </>
@@ -65,6 +94,10 @@ export function Navbar({ onOpenMenu }) {
                 Teacher Dashboard
               </NavLink>
               <NavLink to="/dashboard/teacher/create-course" className={({ isActive }) => (isActive ? 'text-gray-950 dark:text-white font-bold' : 'hover:text-gray-950 dark:hover:text-white')}>
+              <NavLink to="/dashboard/teacher" end className={linkClass}>
+                Teacher Dashboard
+              </NavLink>
+              <NavLink to="/dashboard/teacher/create-course" className={linkClass}>
                 Create Course
               </NavLink>
             </>
@@ -73,11 +106,25 @@ export function Navbar({ onOpenMenu }) {
           {isAuthenticated && user?.role === 'admin' && (
             <>
               <NavLink to="/dashboard/admin" end className={({ isActive }) => (isActive ? 'text-gray-950 dark:text-white font-bold' : 'hover:text-gray-950 dark:hover:text-white')}>
+              <NavLink to="/dashboard/admin" end className={linkClass}>
                 Admin Dashboard
               </NavLink>
             </>
           )}
         </nav>
+        <div className="ml-auto flex items-center gap-3">
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900/50 hover:text-gray-950 dark:hover:text-white transition-all duration-300 focus:outline-none cursor-pointer"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? (
+              <Sun size={20} className="text-amber-500 transition-transform hover:rotate-45" />
+            ) : (
+              <Moon size={20} className="text-gray-700 dark:text-gray-300" />
+            )}
+          </button>
 
         <div className="ml-auto flex items-center gap-3">
           {/* Theme Toggle Button */}
@@ -97,6 +144,13 @@ export function Navbar({ onOpenMenu }) {
           <div className="hidden items-center gap-3 lg:flex">
             {isAuthenticated ? (
               <button onClick={handleLogout} className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-950 dark:hover:text-white cursor-pointer">
+          {/* Desktop Auth Section */}
+          <div className="hidden items-center gap-3 lg:flex">
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-950 dark:hover:text-white transition-colors cursor-pointer"
+              >
                 <LogOut size={17} />
                 Logout
               </button>
@@ -104,12 +158,27 @@ export function Navbar({ onOpenMenu }) {
               <>
                 <Link to="/login" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-950 dark:hover:text-white">Login</Link>
                 <Link to="/register"><Button>Register</Button></Link>
+                <Link
+                  to="/login"
+                  className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-950 dark:hover:text-white transition-colors"
+                >
+                  Login
+                </Link>
+                <Link to="/register">
+                  <Button>Register</Button>
+                </Link>
               </>
             )}
           </div>
 
           {/* Mobile Menu Trigger */}
           <button className="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 dark:border-gray-800 lg:hidden text-gray-700 dark:text-gray-300 cursor-pointer" onClick={onOpenMenu} aria-label="Open menu">
+          {/* Mobile Menu Toggle */}
+          <button
+            className="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900/50 hover:text-gray-950 dark:hover:text-white lg:hidden transition-colors cursor-pointer"
+            onClick={onOpenMenu}
+            aria-label="Open menu"
+          >
             <Menu size={20} />
           </button>
         </div>
@@ -117,4 +186,5 @@ export function Navbar({ onOpenMenu }) {
     </header>
   );
 }
+
 export default Navbar;

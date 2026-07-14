@@ -5,6 +5,7 @@ export const ThemeContext = createContext(null);
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('skillshareTheme') || 'dark';
+    return localStorage.getItem('skillshareTheme') || 'light';
   });
 
   useEffect(() => {

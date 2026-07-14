@@ -66,6 +66,18 @@ export function AdminPage({ title, view }) {
     }
   };
 
+  const handleVerifyInstructor = async (userId, status) => {
+    setError('');
+    setSuccess('');
+    try {
+      await userApi.verifyInstructor(userId, status);
+      setSuccess(`Instructor verification updated to ${status}.`);
+      loadAdminData();
+    } catch (apiError) {
+      setError(apiError.message || 'Failed to update instructor verification status');
+    }
+  };
+
   const handleDeleteCourse = async (courseId) => {
     const confirmed = window.confirm('Are you sure you want to delete this course permanently? All enrollments and lessons will be removed.');
     if (!confirmed) return;
@@ -408,7 +420,7 @@ export function AdminPage({ title, view }) {
       {view === 'overview' && <Overview users={users} courses={courses} instructors={stats.instructors} payments={stats.payments} />}
       {view === 'users' && <UsersTable users={users} onDeleteUser={handleDeleteUser} />}
       {view === 'courses' && <CoursesTable courses={courses} onDeleteCourse={handleDeleteCourse} />}
-      {view === 'instructors' && <UsersTable users={users.filter((user) => user.role === 'instructor')} onDeleteUser={handleDeleteUser} />}
+      {view === 'instructors' && <InstructorsTable users={users.filter((user) => user.role === 'instructor')} onDeleteUser={handleDeleteUser} onVerifyInstructor={handleVerifyInstructor} />}
       {view === 'payments' && <OrdersTable orders={orders} />}
       {view === 'categories' && (
         <CategoriesTable 
@@ -619,4 +631,174 @@ function Reports({ courses, orders, users }) {
 
 function SettingsPanel() {
   return <form className="grid max-w-2xl gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"><Settings className="text-blue-600" /><FormInput label="Platform Name" name="name" placeholder="SkillShare" readOnly /><FormInput label="Support Email" name="email" placeholder="support@skillshare.test" readOnly /></form>;
+}
+
+function InstructorsTable({ users, onDeleteUser, onVerifyInstructor }) {
+  const [selectedInstructor, setSelectedInstructor] = useState(null);
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+            <tr>
+              <th className="px-5 py-4 font-black">Name</th>
+              <th className="px-5 py-4 font-black">Email</th>
+              <th className="px-5 py-4 font-black">Verification Status</th>
+              <th className="px-5 py-4 font-black">Documents Submitted</th>
+              <th className="px-5 py-4 font-black">Registered</th>
+              <th className="px-5 py-4 font-black text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {users.map((user) => {
+              const hasDocs = user.verificationDocuments?.instructorId || user.verificationDocuments?.degreeQualifications;
+              return (
+                <tr key={user._id} className="hover:bg-gray-50">
+                  <td className="px-5 py-4 font-semibold text-gray-900">{user.name}</td>
+                  <td className="px-5 py-4 text-gray-600">{user.email}</td>
+                  <td className="px-5 py-4 text-gray-600">
+                    <span className={`px-2.5 py-1 text-xs font-bold rounded-full uppercase tracking-wider ${
+                      user.verificationStatus === 'approved' 
+                        ? 'bg-emerald-55 text-emerald-800 border border-emerald-200' 
+                        : user.verificationStatus === 'rejected' 
+                          ? 'bg-rose-55 text-rose-805 border border-rose-200' 
+                          : 'bg-amber-55 text-amber-808 border border-amber-200'
+                    }`}>
+                      {user.verificationStatus || 'pending'}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-gray-600">
+                    {hasDocs ? (
+                      <button 
+                        onClick={() => setSelectedInstructor(user)}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 underline"
+                      >
+                        Review Documents
+                      </button>
+                    ) : (
+                      <span className="text-xs text-gray-400 italic">No documents uploaded</span>
+                    )}
+                  </td>
+                  <td className="px-5 py-4 text-gray-600">{new Date(user.createdAt).toLocaleDateString()}</td>
+                  <td className="px-5 py-4 text-right">
+                    <button 
+                      onClick={() => onDeleteUser(user._id)} 
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition"
+                    >
+                      <Trash2 size={13} /> Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Review Modal */}
+      {selectedInstructor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-4xl rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-gray-100 pb-4 mb-6">
+              <div>
+                <h3 className="text-xl font-black text-gray-900">Review Verification Documents</h3>
+                <p className="text-sm text-gray-500 mt-1">Instructor: <span className="font-bold text-gray-800">{selectedInstructor.name}</span> ({selectedInstructor.email})</p>
+              </div>
+              <button 
+                onClick={() => setSelectedInstructor(null)} 
+                className="rounded-xl border border-gray-200 p-1.5 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Document display slots */}
+            <div className="grid gap-6 md:grid-cols-2">
+              
+              {/* Document 1: Instructor ID */}
+              <div className="border border-gray-200 rounded-2xl p-4 bg-gray-50 flex flex-col">
+                <span className="text-sm font-bold text-gray-900 mb-2 block">Instructor ID / Corporate ID</span>
+                <div className="border border-gray-200 rounded-xl bg-white p-2 flex items-center justify-center min-h-[300px] overflow-hidden">
+                  {selectedInstructor.verificationDocuments?.instructorId?.startsWith('data:application/pdf') ? (
+                    <object 
+                      data={selectedInstructor.verificationDocuments.instructorId} 
+                      type="application/pdf" 
+                      className="w-full h-[300px]"
+                    >
+                      <p className="text-xs text-gray-500">PDF viewer not supported. <a className="text-blue-600 underline font-bold" href={selectedInstructor.verificationDocuments.instructorId} download="instructor_id.pdf">Download PDF</a></p>
+                    </object>
+                  ) : selectedInstructor.verificationDocuments?.instructorId ? (
+                    <img 
+                      src={selectedInstructor.verificationDocuments.instructorId} 
+                      alt="Instructor ID" 
+                      className="max-h-[300px] object-contain rounded-lg"
+                    />
+                  ) : (
+                    <span className="text-xs text-gray-400 italic">No file uploaded</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Document 2: Degree/Qualification */}
+              <div className="border border-gray-200 rounded-2xl p-4 bg-gray-50 flex flex-col">
+                <span className="text-sm font-bold text-gray-900 mb-2 block">Degree or Qualifications Certificate</span>
+                <div className="border border-gray-200 rounded-xl bg-white p-2 flex items-center justify-center min-h-[300px] overflow-hidden">
+                  {selectedInstructor.verificationDocuments?.degreeQualifications?.startsWith('data:application/pdf') ? (
+                    <object 
+                      data={selectedInstructor.verificationDocuments.degreeQualifications} 
+                      type="application/pdf" 
+                      className="w-full h-[300px]"
+                    >
+                      <p className="text-xs text-gray-500">PDF viewer not supported. <a className="text-blue-600 underline font-bold" href={selectedInstructor.verificationDocuments.degreeQualifications} download="qualification.pdf">Download PDF</a></p>
+                    </object>
+                  ) : selectedInstructor.verificationDocuments?.degreeQualifications ? (
+                    <img 
+                      src={selectedInstructor.verificationDocuments.degreeQualifications} 
+                      alt="Qualification Certificate" 
+                      className="max-h-[300px] object-contain rounded-lg"
+                    />
+                  ) : (
+                    <span className="text-xs text-gray-400 italic">No file uploaded</span>
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex justify-end gap-3 mt-8 border-t border-gray-100 pt-5">
+              <button 
+                onClick={async () => {
+                  await onVerifyInstructor(selectedInstructor._id, 'approved');
+                  setSelectedInstructor(null);
+                }}
+                className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white transition flex items-center gap-1.5"
+              >
+                Approve Application
+              </button>
+              <button 
+                onClick={async () => {
+                  await onVerifyInstructor(selectedInstructor._id, 'rejected');
+                  setSelectedInstructor(null);
+                }}
+                className="rounded-xl bg-rose-600 hover:bg-rose-700 px-5 py-2.5 text-sm font-bold text-white transition flex items-center gap-1.5"
+              >
+                Reject Application
+              </button>
+              <button 
+                onClick={() => setSelectedInstructor(null)} 
+                className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

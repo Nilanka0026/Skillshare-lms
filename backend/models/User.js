@@ -26,6 +26,21 @@ const userSchema = new mongoose.Schema(
       enum: ['student', 'instructor', 'admin'],
       default: 'student'
     },
+    verificationStatus: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected', 'none'],
+      default: 'none'
+    },
+    verificationDocuments: {
+      instructorId: {
+        type: String,
+        default: ''
+      },
+      degreeQualifications: {
+        type: String,
+        default: ''
+      }
+    },
     profileImage: {
       type: String,
       default: ''

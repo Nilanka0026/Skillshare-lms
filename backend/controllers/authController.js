@@ -8,17 +8,26 @@ const sendAuthResponse = (res, user, statusCode = 200) => {
     name: user.name,
     email: user.email,
     role: user.role,
+    verificationStatus: user.verificationStatus,
+    verificationDocuments: user.verificationDocuments,
     profileImage: user.profileImage,
     token: generateToken(user._id)
   });
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { email, name, password, role } = req.body;
+  const { email, name, password, role, verificationDocuments } = req.body;
 
   if (!name || !email || !password) {
     res.status(400);
     throw new Error('Name, email, and password are required');
+  }
+
+  if (role === 'instructor') {
+    if (!verificationDocuments || !verificationDocuments.instructorId) {
+      res.status(400);
+      throw new Error('Instructor ID verification document is required for instructor registration');
+    }
   }
 
   const existingUser = await User.findOne({ email });
@@ -32,7 +41,12 @@ const registerUser = asyncHandler(async (req, res) => {
     name,
     email,
     password,
-    role: role || 'student'
+    role: role || 'student',
+    verificationStatus: role === 'instructor' ? 'pending' : 'none',
+    verificationDocuments: role === 'instructor' ? {
+      instructorId: verificationDocuments.instructorId,
+      degreeQualifications: verificationDocuments.degreeQualifications || ''
+    } : undefined
   });
 
   sendAuthResponse(res, user, 201);
