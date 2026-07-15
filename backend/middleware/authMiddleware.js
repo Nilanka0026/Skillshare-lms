@@ -22,12 +22,23 @@ const protect = asyncHandler(async (req, res, next) => {
       res.status(401);
       throw new Error('Not authorized, user not found');
     }
-
-    next();
   } catch (error) {
     res.status(401);
     throw new Error('Not authorized, token failed');
   }
+
+  if (req.user.role === 'instructor') {
+    if (req.user.verificationStatus === 'pending' || req.user.verificationStatus === 'none') {
+      res.status(403);
+      throw new Error('Verification process under going');
+    }
+    if (req.user.verificationStatus === 'rejected') {
+      res.status(403);
+      throw new Error('Verification failed');
+    }
+  }
+
+  next();
 });
 
 const authorizeRoles = (...roles) => {
