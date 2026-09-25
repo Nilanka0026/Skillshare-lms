@@ -70,7 +70,7 @@ export function CourseDetails() {
 
     try {
       await enrollInCourse(courseIdForLinks);
-      navigate('/dashboard/student/my-courses');
+      navigate(`/dashboard/student/learning/${courseIdForLinks}`);
     } catch (err) {
       setEnrollError(err.message || 'Enrollment failed. Please try again.');
     } finally {
@@ -169,7 +169,7 @@ export function CourseDetails() {
 
             {isEnrolled ? (
               <Link
-                to="/dashboard/student/my-courses"
+                to={`/dashboard/student/learning/${courseIdForLinks}`}
                 className="mt-5 inline-flex w-full justify-center rounded-xl bg-green-600 px-5 py-3 font-semibold text-white hover:bg-green-700 text-center"
               >
                 Continue Learning

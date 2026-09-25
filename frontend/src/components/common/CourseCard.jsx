@@ -9,7 +9,7 @@ export function CourseCard({ course }) {
 
   return (
     <article className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md duration-300">
-      <img src={course.image} alt={course.title} className="h-48 w-full object-cover" />
+      <img src={course.thumbnail || course.image} alt={course.title} className="h-48 w-full object-cover" />
       <div className="space-y-4 p-5">
         <div className="flex items-center justify-between">
           <span className="rounded-full bg-blue-50 dark:bg-blue-950/40 px-3 py-1 text-xs font-bold text-blue-700 dark:text-blue-400">{course.category}</span>
