@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BarChart3, BookOpen, CreditCard, Star, Trash2, Users, Edit3, Eye, EyeOff, Calendar } from 'lucide-react';
+import { BarChart3, BookOpen, CreditCard, Star, Trash2, Users, Edit3, Eye, EyeOff, Calendar, PlayCircle, Plus, Video } from 'lucide-react';
 import { DashboardCard } from '../../../components/common/DashboardCard.jsx';
 import { FormInput } from '../../../components/common/FormInput.jsx';
 import { useAuth } from '../../../context/useAuth.js';
@@ -28,6 +28,7 @@ export function InstructorPage({ title, view }) {
 
   const [editingCourse, setEditingCourse] = useState(null);
   const [editMode, setEditMode] = useState(false);
+  const [managingLessonsFor, setManagingLessonsFor] = useState(null);
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -82,6 +83,12 @@ export function InstructorPage({ title, view }) {
   const handleEditClick = (course) => {
     setEditingCourse(course);
     setEditMode(true);
+    setManagingLessonsFor(null);
+  };
+
+  const handleManageLessonsClick = (course) => {
+    setManagingLessonsFor(course);
+    setEditMode(false);
   };
 
   const handleViewStudents = async (courseId) => {
@@ -163,13 +170,14 @@ export function InstructorPage({ title, view }) {
         )
       )}
 
-      {view === 'courses' && !editMode && (
+      {view === 'courses' && !editMode && !managingLessonsFor && (
         user?.verificationStatus === 'approved' ? (
           <CourseGrid 
             courses={courses} 
             onDeleteCourse={handleDeleteCourse} 
             onTogglePublish={handleTogglePublish}
             onEditCourse={handleEditClick}
+            onManageLessons={handleManageLessonsClick}
             onViewStudents={handleViewStudents}
           />
         ) : (
@@ -180,7 +188,7 @@ export function InstructorPage({ title, view }) {
         )
       )}
 
-      {view === 'courses' && editMode && editingCourse && (
+      {view === 'courses' && editMode && editingCourse && !managingLessonsFor && (
         <div>
           <button 
             onClick={() => { setEditMode(false); setEditingCourse(null); }}
@@ -199,6 +207,18 @@ export function InstructorPage({ title, view }) {
             onError={setError}
           />
         </div>
+      )}
+
+      {view === 'courses' && managingLessonsFor && (
+        <ManageLessons 
+          course={managingLessonsFor}
+          onBack={() => {
+            setManagingLessonsFor(null);
+            loadDashboardData();
+          }}
+          onError={setError}
+          onSuccess={setSuccess}
+        />
       )}
 
       {view === 'students' && (
@@ -484,7 +504,7 @@ function CourseForm({ existingCourse = null, onCreated, onError }) {
   );
 }
 
-function CourseGrid({ courses, onDeleteCourse, onTogglePublish, onEditCourse, onViewStudents }) {
+function CourseGrid({ courses, onDeleteCourse, onTogglePublish, onEditCourse, onManageLessons, onViewStudents }) {
   if (!courses.length) {
     return (
       <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-sm font-semibold text-gray-500 shadow-sm">
@@ -546,8 +566,15 @@ function CourseGrid({ courses, onDeleteCourse, onTogglePublish, onEditCourse, on
               </button>
               
               <button 
+                onClick={() => onManageLessons(course)}
+                className="inline-flex justify-center items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 transition"
+              >
+                <Video size={14} /> Lessons
+              </button>
+
+              <button 
                 onClick={() => onViewStudents(course._id)}
-                className="inline-flex justify-center items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-2 text-xs font-bold text-blue-600 hover:bg-blue-100 transition"
+                className="col-span-2 inline-flex justify-center items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-2 text-xs font-bold text-blue-600 hover:bg-blue-100 transition"
               >
                 <Users size={14} /> Students
               </button>
@@ -725,6 +752,153 @@ function ProfileSettings({ initialUser }) {
       
       <div className="mt-2 text-xs text-amber-700 bg-amber-50 p-4 rounded-xl font-semibold">
         Note: Display details are synchronized with system core registration details.
+      </div>
+    </div>
+  );
+}
+
+function ManageLessons({ course, onBack, onError, onSuccess }) {
+  const [lessons, setLessons] = useState(course.lessons || []);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [lessonData, setLessonData] = useState({ title: '', duration: '' });
+  const [videoFile, setVideoFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setVideoFile(e.target.files[0]);
+    }
+  };
+
+  const handleAddLesson = async (e) => {
+    e.preventDefault();
+    if (!videoFile) {
+      onError('Please select a video file.');
+      return;
+    }
+    setUploading(true);
+    try {
+      // 1. Upload video
+      const uploadRes = await courseApi.uploadVideo(videoFile);
+      const videoUrl = `http://localhost:5000${uploadRes}`; // assuming backend is on 5000
+
+      // 2. Add lesson to course
+      const lessonRes = await courseApi.addLesson(course._id, {
+        title: lessonData.title,
+        duration: lessonData.duration,
+        videoUrl: videoUrl
+      });
+      
+      setLessons([...lessons, lessonRes]);
+      onSuccess('Lesson added successfully!');
+      setShowAddForm(false);
+      setLessonData({ title: '', duration: '' });
+      setVideoFile(null);
+    } catch (err) {
+      onError(err.message || 'Failed to add lesson');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <button 
+        onClick={onBack}
+        className="mb-4 inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50"
+      >
+        &larr; Back to Courses List
+      </button>
+
+      <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+        <div>
+          <h2 className="text-xl font-black text-gray-950">Manage Lessons</h2>
+          <p className="text-gray-500 mt-1">Course: <span className="font-bold text-gray-800">{course.title}</span></p>
+        </div>
+        {!showAddForm && (
+          <button 
+            onClick={() => setShowAddForm(true)}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700 transition"
+          >
+            <Plus size={16} /> Add New Lesson
+          </button>
+        )}
+      </div>
+
+      {showAddForm && (
+        <form onSubmit={handleAddLesson} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm grid gap-5">
+          <h3 className="text-lg font-black text-gray-950">Add New Lesson</h3>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <FormInput 
+              label="Lesson Title" 
+              name="title"
+              value={lessonData.title}
+              onChange={(e) => setLessonData({...lessonData, title: e.target.value})}
+              required
+              placeholder="e.g. Introduction to React"
+            />
+            <FormInput 
+              label="Duration" 
+              name="duration"
+              value={lessonData.duration}
+              onChange={(e) => setLessonData({...lessonData, duration: e.target.value})}
+              required
+              placeholder="e.g. 15 min"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Lecture Video (.mp4, .mkv)</label>
+            <input 
+              type="file" 
+              accept="video/*" 
+              onChange={handleFileChange}
+              required
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button 
+              type="submit" 
+              disabled={uploading}
+              className="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold disabled:opacity-50"
+            >
+              {uploading ? 'Uploading & Saving...' : 'Save Lesson'}
+            </button>
+            <button 
+              type="button" 
+              onClick={() => setShowAddForm(false)}
+              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+        <h3 className="text-lg font-black text-gray-950">Course Content</h3>
+        {lessons.length === 0 ? (
+          <p className="text-gray-500 py-4 text-center">No lessons added to this course yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {lessons.map((lesson, index) => (
+              <div key={lesson._id || index} className="flex justify-between items-center p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+                <div className="flex items-center gap-4">
+                  <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
+                    <PlayCircle size={20} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900">{lesson.title}</h4>
+                    <p className="text-xs font-semibold text-gray-500">{lesson.duration}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

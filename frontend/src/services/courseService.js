@@ -12,6 +12,13 @@ export const courseService = {
   remove: (id) => apiClient.delete(`/courses/${id}`),
   addLesson: (courseId, payload) => apiClient.post(`/courses/${courseId}/lessons`, payload),
   addReview: (courseId, payload) => apiClient.post(`/courses/${courseId}/reviews`, payload),
+  uploadVideo: (file) => {
+    const formData = new FormData();
+    formData.append('video', file);
+    return apiClient.post('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
 
   // New Teacher APIs
   teacherCourses: () => apiClient.get('/teacher/courses'),
