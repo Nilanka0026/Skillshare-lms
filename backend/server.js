@@ -13,7 +13,8 @@ app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5174',
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.get('/', (req, res) => {
   res.json({
@@ -35,6 +36,10 @@ app.use('/api/teachers', require('./routes/teacherPublicRoutes'));
 app.use('/api/teacher', require('./routes/teacherDashboardRoutes'));
 app.use('/api/student', require('./routes/studentDashboardRoutes'));
 app.use('/api/chatbot', require('./routes/chatbotRoutes')); // Gemini Chatbot route
+app.use('/api/upload', require('./routes/uploadRoutes'));
+
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+
 
 app.use(notFound);
 app.use(errorHandler);

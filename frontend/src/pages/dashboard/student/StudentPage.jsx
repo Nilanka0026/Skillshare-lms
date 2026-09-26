@@ -88,7 +88,7 @@ function Overview({ myCourses }) {
             </div>
             <p className="mt-3 text-sm text-gray-600 flex justify-between items-center">
               <span>Currently studying: <strong>{myCourses[0].title}</strong> ({myCourses[0].progress || 0}% complete)</span>
-              <Link to={`/courses/${myCourses[0]._id || myCourses[0].id}`} className="text-blue-600 font-bold hover:underline">
+              <Link to={`/dashboard/student/learning/${myCourses[0]._id || myCourses[0].id}`} className="text-blue-600 font-bold hover:underline">
                 Resume Course &rarr;
               </Link>
             </p>
@@ -136,7 +136,7 @@ function CourseGrid({ courses, title, onUnenroll }) {
 
                 <div className="p-5 pt-0 grid grid-cols-2 gap-2">
                   <Link 
-                    to={`/courses/${courseId}`} 
+                    to={`/dashboard/student/learning/${courseId}`} 
                     className="inline-flex justify-center items-center rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-blue-700 text-center"
                   >
                     Continue

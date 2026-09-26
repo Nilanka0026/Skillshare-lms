@@ -49,6 +49,19 @@ const registerUser = asyncHandler(async (req, res) => {
     } : undefined
   });
 
+  if (user.role === 'instructor' && user.verificationStatus === 'pending') {
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      verificationStatus: user.verificationStatus,
+      verificationDocuments: user.verificationDocuments,
+      profileImage: user.profileImage
+    });
+    return;
+  }
+
   sendAuthResponse(res, user, 201);
 });
 
@@ -60,6 +73,17 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!user || !(await user.matchPassword(password))) {
     res.status(401);
     throw new Error('Invalid email or password');
+  }
+
+  if (user.role === 'instructor') {
+    if (user.verificationStatus === 'pending' || user.verificationStatus === 'none') {
+      res.status(403);
+      throw new Error('Verification process under going');
+    }
+    if (user.verificationStatus === 'rejected') {
+      res.status(403);
+      throw new Error('Verification failed');
+    }
   }
 
   sendAuthResponse(res, user);

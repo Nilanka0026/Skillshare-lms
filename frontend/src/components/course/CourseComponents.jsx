@@ -4,7 +4,7 @@ import { ProgressBar, RatingStars } from '../ui/index.jsx';
 export function CourseCard({ course }) {
   return (
     <article className="course-card">
-      <img src={course.image} alt={course.title} />
+      <img src={course.thumbnail || course.image} alt={course.title} />
       <div className="course-card-body">
         <span className="badge">{course.category}</span>
         <h3>{course.title}</h3>
@@ -29,7 +29,7 @@ export function CourseGrid({ courses }) {
 export function CourseListItem({ course }) {
   return (
     <article className="list-item">
-      <img src={course.image} alt="" />
+      <img src={course.thumbnail || course.image} alt="" />
       <div>
         <h3>{course.title}</h3>
         <p>{course.level} · {course.duration} · by {course.instructor}</p>

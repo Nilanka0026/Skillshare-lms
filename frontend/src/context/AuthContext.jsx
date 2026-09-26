@@ -33,13 +33,17 @@ export function AuthProvider({ children }) {
     return persistUser(userData);
   }, [persistUser]);
 
-  const register = useCallback(async ({ email, fullName, password, role }) => {
+  const register = useCallback(async ({ email, fullName, password, role, verificationDocuments }) => {
     const userData = await authApi.register({
       email,
       name: fullName,
       password,
-      role
+      role,
+      verificationDocuments
     });
+    if (userData.verificationStatus === 'pending') {
+      return userData;
+    }
     return persistUser(userData);
   }, [persistUser]);
 

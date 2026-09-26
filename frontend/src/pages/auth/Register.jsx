@@ -21,6 +21,7 @@ export function Register() {
   const [qualificationFile, setQualificationFile] = useState(null);
   const [instructorIdBase64, setInstructorIdBase64] = useState('');
   const [qualificationBase64, setQualificationBase64] = useState('');
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -77,14 +78,45 @@ export function Register() {
         };
       }
       console.log('Registration data:', payload);
-      await register(payload);
-      navigate('/');
+      const res = await register(payload);
+      if (res && res.verificationStatus === 'pending') {
+        setRegistrationSuccess(true);
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       setApiError(error.message);
     } finally {
       setLoading(false);
     }
   };
+
+  if (registrationSuccess) {
+    return (
+      <AuthFrame title="Registration pending" subtitle="Thank you for signing up!">
+        <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-6 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+            <LoaderCircle className="animate-spin" size={24} />
+          </div>
+          <h2 className="text-xl font-bold text-blue-950">Registration process is under progress</h2>
+          <p className="mt-3 text-sm text-gray-600 leading-relaxed">
+            Your instructor account application has been submitted. Since you registered as an instructor, our administration team must review and verify your uploaded ID document.
+          </p>
+          <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+            Please check back later. Once the verification is approved, you will be able to log in and start teaching!
+          </p>
+          <div className="mt-6 flex justify-center gap-4">
+            <Link to="/login" className="inline-flex justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition">
+              Go to Login
+            </Link>
+            <Link to="/" className="inline-flex justify-center rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 transition">
+              Return Home
+            </Link>
+          </div>
+        </div>
+      </AuthFrame>
+    );
+  }
 
   return (
     <AuthFrame title="Create your account" subtitle={roleText}>
