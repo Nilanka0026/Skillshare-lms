@@ -11,6 +11,7 @@ export const courseService = {
   update: (id, payload) => apiClient.put(`/courses/${id}`, payload),
   remove: (id) => apiClient.delete(`/courses/${id}`),
   addLesson: (courseId, payload) => apiClient.post(`/courses/${courseId}/lessons`, payload),
+  removeLesson: (courseId, lessonId) => apiClient.delete(`/courses/${courseId}/lessons/${lessonId}`),
   addReview: (courseId, payload) => apiClient.post(`/courses/${courseId}/reviews`, payload),
   uploadVideo: (file) => {
     const formData = new FormData();

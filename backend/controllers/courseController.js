@@ -145,6 +145,40 @@ const addReview = asyncHandler(async (req, res) => {
   res.status(201).json(review);
 });
 
+const removeLesson = asyncHandler(async (req, res) => {
+  const course = await Course.findById(req.params.id);
+
+  if (!course) {
+    res.status(404);
+    throw new Error('Course not found');
+  }
+
+  if (course.instructor.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    res.status(403);
+    throw new Error('Forbidden: you can only remove lessons from your own courses');
+  }
+
+  const lesson = await Lesson.findById(req.params.lessonId);
+  if (!lesson) {
+    res.status(404);
+    throw new Error('Lesson not found');
+  }
+
+  if (lesson.courseId.toString() !== course._id.toString()) {
+    res.status(400);
+    throw new Error('Lesson does not belong to this course');
+  }
+
+  await lesson.deleteOne();
+  
+  course.lessons = course.lessons.filter(
+    (lessonId) => lessonId.toString() !== req.params.lessonId
+  );
+  await course.save();
+
+  res.json({ message: 'Lesson removed successfully' });
+});
+
 module.exports = {
   addLesson,
   addReview,
@@ -153,5 +187,6 @@ module.exports = {
   getCourseById,
   getCourses,
   getMyCourses,
+  removeLesson,
   updateCourse
 };

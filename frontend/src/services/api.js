@@ -16,6 +16,7 @@ export const courseApi = {
   create: (payload) => courseService.create(payload),
   remove: (id) => courseService.remove(id),
   addLesson: (courseId, payload) => courseService.addLesson(courseId, payload),
+  removeLesson: (courseId, lessonId) => courseService.removeLesson(courseId, lessonId),
   uploadVideo: (file) => courseService.uploadVideo(file),
   
   // Teacher functions
