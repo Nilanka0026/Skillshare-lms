@@ -770,6 +770,17 @@ function ManageLessons({ course, onBack, onError, onSuccess }) {
     }
   };
 
+  const handleDeleteLesson = async (lessonId) => {
+    if (!window.confirm('Are you sure you want to delete this lesson?')) return;
+    try {
+      await courseApi.removeLesson(course._id, lessonId);
+      setLessons(lessons.filter(l => l._id !== lessonId));
+      onSuccess('Lesson deleted successfully!');
+    } catch (err) {
+      onError(err.message || 'Failed to delete lesson');
+    }
+  };
+
   const handleAddLesson = async (e) => {
     e.preventDefault();
     if (!videoFile) {
@@ -895,6 +906,13 @@ function ManageLessons({ course, onBack, onError, onSuccess }) {
                     <p className="text-xs font-semibold text-gray-500">{lesson.duration}</p>
                   </div>
                 </div>
+                <button
+                  onClick={() => handleDeleteLesson(lesson._id)}
+                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                  title="Delete Lesson"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
             ))}
           </div>
