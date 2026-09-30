@@ -17,26 +17,43 @@ const storage = multer.diskStorage({
   }
 });
 
-function checkFileType(file, cb) {
-  const filetypes = /mp4|mkv|webm|mov/;
+function checkFileType(file, cb, type) {
+  let filetypes;
+  if (type === 'image') {
+    filetypes = /jpg|jpeg|png|webp/;
+  } else {
+    filetypes = /mp4|mkv|webm|mov/;
+  }
+  
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = filetypes.test(file.mimetype);
 
   if (extname && mimetype) {
     return cb(null, true);
   } else {
-    cb('Videos only!');
+    cb(`Error: ${type === 'image' ? 'Images' : 'Videos'} only!`);
   }
 }
 
-const upload = multer({
+const uploadVideo = multer({
   storage,
   fileFilter: function (req, file, cb) {
-    checkFileType(file, cb);
+    checkFileType(file, cb, 'video');
   }
 });
 
-router.post('/', protect, authorizeRoles('instructor', 'admin'), upload.single('video'), (req, res) => {
+const uploadImage = multer({
+  storage,
+  fileFilter: function (req, file, cb) {
+    checkFileType(file, cb, 'image');
+  }
+});
+
+router.post('/', protect, authorizeRoles('instructor', 'admin'), uploadVideo.single('video'), (req, res) => {
+  res.send(`/${req.file.path.replace(/\\/g, '/')}`);
+});
+
+router.post('/image', protect, uploadImage.single('image'), (req, res) => {
   res.send(`/${req.file.path.replace(/\\/g, '/')}`);
 });
 

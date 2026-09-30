@@ -4,7 +4,7 @@ import { DashboardCard } from '../../../components/common/DashboardCard.jsx';
 import { FormInput } from '../../../components/common/FormInput.jsx';
 import { useAuth } from '../../../context/useAuth.js';
 import { categories } from '../../../data/platformData.js';
-import { courseApi } from '../../../services/api.js';
+import { courseApi, authApi } from '../../../services/api.js';
 import { formatCurrency } from '../../../utils/formatters.js';
 
 const initialCourse = {
@@ -735,10 +735,49 @@ function Analytics({ analytics, courses }) {
 }
 
 function ProfileSettings({ initialUser }) {
+  const { updateUser } = useAuth();
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const uploadRes = await authApi.uploadImage(file);
+      const imageUrl = `http://localhost:5000${uploadRes.data || uploadRes}`; 
+      const updatedUser = await authApi.updateProfile({ profileImage: imageUrl });
+      updateUser(updatedUser.data || updatedUser);
+      alert('Profile picture updated successfully!');
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="grid max-w-2xl gap-5 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <h3 className="text-lg font-black text-gray-950">Teacher Profile Specifications</h3>
       
+      <div className="flex items-center gap-4 mb-4">
+        <img 
+          src={initialUser?.profileImage || 'https://via.placeholder.com/150'} 
+          alt="Profile" 
+          className="w-20 h-20 rounded-full object-cover border"
+        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Update Profile Picture</label>
+          <input 
+            type="file" 
+            accept="image/*"
+            onChange={handleImageUpload}
+            disabled={uploading}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+        </div>
+      </div>
+
       <FormInput 
         label="Name" 
         value={initialUser?.name || ''} 

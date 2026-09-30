@@ -6,7 +6,9 @@ import adminService from './adminService';
 export const authApi = {
   login: (payload) => authService.login(payload),
   register: (payload) => authService.register(payload),
-  me: () => authService.me()
+  me: () => authService.me(),
+  updateProfile: (payload) => authService.updateProfile(payload),
+  uploadImage: (file) => authService.uploadImage(file)
 };
 
 export const courseApi = {
