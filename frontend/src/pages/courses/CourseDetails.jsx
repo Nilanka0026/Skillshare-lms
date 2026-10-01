@@ -139,15 +139,37 @@ export function CourseDetails() {
             </div>
 
             <div className="mt-10">
-              <h2 className="text-2xl font-black text-gray-950">Reviews</h2>
+              <h2 className="text-2xl font-black text-gray-950">Student Reviews</h2>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
-                {reviews.length > 0 ? reviews.map((review) => (
-                  <ReviewCard key={review._id} name={review.userId?.name || 'Student'} text={review.comment} />
-                )) : (
-                  <>
-                    <ReviewCard />
-                    <ReviewCard name="Daniel P." text="Clear structure and realistic examples throughout the course." />
-                  </>
+                {reviews.length > 0 ? (
+                  reviews.map((review) => (
+                    <article key={review._id} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="grid h-10 w-10 place-items-center rounded-full bg-blue-600 font-bold text-white text-sm">
+                            {review.userId?.profileImage ? (
+                              <img src={review.userId.profileImage} alt={review.userId.name} className="h-full w-full rounded-full object-cover" />
+                            ) : (
+                              (review.userId?.name || 'S')[0]
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">{review.userId?.name || 'Student'}</h4>
+                            <p className="text-xs text-gray-400">Verified Student</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 text-amber-500 font-bold text-sm">
+                          <Star size={15} className="fill-amber-500" />
+                          <span>{review.rating}.0</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 leading-relaxed">&ldquo;{review.comment}&rdquo;</p>
+                    </article>
+                  ))
+                ) : (
+                  <div className="col-span-2 rounded-2xl border border-gray-200 bg-gray-50 p-8 text-center text-gray-500 text-sm">
+                    No student reviews posted yet for this course. Enrolled students can rate and review from their learning dashboard.
+                  </div>
                 )}
               </div>
             </div>
