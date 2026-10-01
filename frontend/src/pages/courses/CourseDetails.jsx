@@ -22,6 +22,7 @@ export function CourseDetails() {
   const [enrollError, setEnrollError] = useState('');
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     courseApi.details(courseId)
       .then((data) => setApiPayload(data))
       .catch((error) => setApiError(error.message));

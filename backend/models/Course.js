@@ -89,7 +89,19 @@ const courseSchema = new mongoose.Schema(
     learningOutcomes: {
       type: [String],
       default: []
-    }
+    },
+    quizzes: [
+      {
+        title: { type: String, required: true },
+        questions: [
+          {
+            questionText: { type: String, required: true },
+            options: [{ type: String, required: true }],
+            correctAnswerIndex: { type: Number, required: true }
+          }
+        ]
+      }
+    ]
   },
   {
     timestamps: true

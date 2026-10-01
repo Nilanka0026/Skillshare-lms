@@ -1,6 +1,7 @@
 const Course = require('../models/Course');
 const Lesson = require('../models/Lesson');
 const Review = require('../models/Review');
+const Enrollment = require('../models/Enrollment');
 const asyncHandler = require('../utils/asyncHandler');
 
 const getCourses = asyncHandler(async (req, res) => {
@@ -237,6 +238,92 @@ const removeLesson = asyncHandler(async (req, res) => {
   res.json({ message: 'Lesson removed successfully' });
 });
 
+const addQuiz = asyncHandler(async (req, res) => {
+  const course = await Course.findById(req.params.id);
+  
+  if (!course) {
+    res.status(404);
+    throw new Error('Course not found');
+  }
+
+  if (course.instructor.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    res.status(403);
+    throw new Error('Forbidden: you can only add quizzes to your own courses');
+  }
+
+  const { title, questions } = req.body;
+  if (!title || !questions || !Array.isArray(questions)) {
+    res.status(400);
+    throw new Error('Please provide a quiz title and a valid array of questions');
+  }
+
+  const newQuiz = {
+    title,
+    questions: questions.map(q => ({
+      questionText: q.questionText,
+      options: q.options,
+      correctAnswerIndex: Number(q.correctAnswerIndex)
+    }))
+  };
+
+  course.quizzes.push(newQuiz);
+  await course.save();
+
+  res.status(201).json(course.quizzes[course.quizzes.length - 1]);
+});
+
+const submitQuiz = asyncHandler(async (req, res) => {
+  const { id, quizId } = req.params;
+  const { answers } = req.body;
+
+  const course = await Course.findById(id);
+  if (!course) {
+    res.status(404);
+    throw new Error('Course not found');
+  }
+
+  const quiz = course.quizzes.id(quizId);
+  if (!quiz) {
+    res.status(404);
+    throw new Error('Quiz not found');
+  }
+
+  let score = 0;
+  const results = quiz.questions.map((q, i) => {
+    const isCorrect = answers[i] === q.correctAnswerIndex;
+    if (isCorrect) score++;
+    return {
+      questionText: q.questionText,
+      options: q.options,
+      correctAnswerIndex: q.correctAnswerIndex,
+      userAnswerIndex: answers[i],
+      isCorrect
+    };
+  });
+
+  const enrollment = await Enrollment.findOne({ student: req.user._id, course: id });
+  if (!enrollment) {
+    res.status(400);
+    throw new Error('You are not enrolled in this course');
+  }
+
+  const existingResultIndex = enrollment.quizResults.findIndex(r => r.quizId.toString() === quizId);
+  if (existingResultIndex !== -1) {
+    enrollment.quizResults[existingResultIndex].score = score;
+    enrollment.quizResults[existingResultIndex].total = quiz.questions.length;
+  } else {
+    enrollment.quizResults.push({ quizId, score, total: quiz.questions.length });
+  }
+
+  await enrollment.save();
+
+  res.json({
+    score,
+    total: quiz.questions.length,
+    results
+  });
+});
+
 module.exports = {
   addLesson,
   addReview,
@@ -246,5 +333,7 @@ module.exports = {
   getCourses,
   getMyCourses,
   removeLesson,
-  updateCourse
+  updateCourse,
+  submitQuiz,
+  addQuiz
 };

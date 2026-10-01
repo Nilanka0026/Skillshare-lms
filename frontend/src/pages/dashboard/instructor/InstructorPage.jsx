@@ -798,10 +798,20 @@ function ProfileSettings({ initialUser }) {
 
 function ManageLessons({ course, onBack, onError, onSuccess }) {
   const [lessons, setLessons] = useState(course.lessons || []);
+  const [quizzes, setQuizzes] = useState(course.quizzes || []);
+  
   const [showAddForm, setShowAddForm] = useState(false);
+  const [addType, setAddType] = useState('lesson'); // 'lesson' or 'quiz'
+  
   const [uploading, setUploading] = useState(false);
+  
+  // Lesson state
   const [lessonData, setLessonData] = useState({ title: '', duration: '' });
   const [videoFile, setVideoFile] = useState(null);
+
+  // Quiz state
+  const [quizData, setQuizData] = useState({ title: '' });
+  const [questions, setQuestions] = useState([{ questionText: '', options: ['', ''], correctAnswerIndex: 0 }]);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -828,11 +838,8 @@ function ManageLessons({ course, onBack, onError, onSuccess }) {
     }
     setUploading(true);
     try {
-      // 1. Upload video
       const uploadRes = await courseApi.uploadVideo(videoFile);
-      const videoUrl = `http://localhost:5000${uploadRes}`; // assuming backend is on 5000
-
-      // 2. Add lesson to course
+      const videoUrl = `http://localhost:5000${uploadRes}`; 
       const lessonRes = await courseApi.addLesson(course._id, {
         title: lessonData.title,
         duration: lessonData.duration,
@@ -851,6 +858,53 @@ function ManageLessons({ course, onBack, onError, onSuccess }) {
     }
   };
 
+  const handleAddQuiz = async (e) => {
+    e.preventDefault();
+    if (questions.some(q => q.questionText.trim() === '' || q.options.some(opt => opt.trim() === ''))) {
+      onError('Please fill in all question texts and options.');
+      return;
+    }
+    setUploading(true);
+    try {
+      const quizRes = await courseApi.addQuiz(course._id, {
+        title: quizData.title,
+        questions: questions
+      });
+      
+      setQuizzes([...quizzes, quizRes.data || quizRes]);
+      onSuccess('Quiz added successfully!');
+      setShowAddForm(false);
+      setQuizData({ title: '' });
+      setQuestions([{ questionText: '', options: ['', ''], correctAnswerIndex: 0 }]);
+    } catch (err) {
+      onError(err.message || 'Failed to add quiz');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const addQuestion = () => {
+    setQuestions([...questions, { questionText: '', options: ['', ''], correctAnswerIndex: 0 }]);
+  };
+
+  const updateQuestion = (index, field, value) => {
+    const newQ = [...questions];
+    newQ[index][field] = value;
+    setQuestions(newQ);
+  };
+
+  const updateOption = (qIndex, optIndex, value) => {
+    const newQ = [...questions];
+    newQ[qIndex].options[optIndex] = value;
+    setQuestions(newQ);
+  };
+
+  const addOption = (qIndex) => {
+    const newQ = [...questions];
+    newQ[qIndex].options.push('');
+    setQuestions(newQ);
+  };
+
   return (
     <div className="space-y-6">
       <button 
@@ -860,22 +914,30 @@ function ManageLessons({ course, onBack, onError, onSuccess }) {
         &larr; Back to Courses List
       </button>
 
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl border border-gray-200 shadow-sm gap-4">
         <div>
-          <h2 className="text-xl font-black text-gray-950">Manage Lessons</h2>
+          <h2 className="text-xl font-black text-gray-950">Manage Course Content</h2>
           <p className="text-gray-500 mt-1">Course: <span className="font-bold text-gray-800">{course.title}</span></p>
         </div>
         {!showAddForm && (
-          <button 
-            onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700 transition"
-          >
-            <Plus size={16} /> Add New Lesson
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => { setAddType('lesson'); setShowAddForm(true); }}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700 transition"
+            >
+              <Plus size={16} /> Add Lesson
+            </button>
+            <button 
+              onClick={() => { setAddType('quiz'); setShowAddForm(true); }}
+              className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-700 transition"
+            >
+              <Plus size={16} /> Add Quiz
+            </button>
+          </div>
         )}
       </div>
 
-      {showAddForm && (
+      {showAddForm && addType === 'lesson' && (
         <form onSubmit={handleAddLesson} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm grid gap-5">
           <h3 className="text-lg font-black text-gray-950">Add New Lesson</h3>
           
@@ -910,53 +972,150 @@ function ManageLessons({ course, onBack, onError, onSuccess }) {
           </div>
 
           <div className="flex gap-3">
-            <button 
-              type="submit" 
-              disabled={uploading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold disabled:opacity-50"
-            >
-              {uploading ? 'Uploading & Saving...' : 'Save Lesson'}
+            <button type="submit" disabled={uploading} className="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold disabled:opacity-50">
+              {uploading ? 'Uploading...' : 'Save Lesson'}
             </button>
-            <button 
-              type="button" 
-              onClick={() => setShowAddForm(false)}
-              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200"
-            >
-              Cancel
-            </button>
+            <button type="button" onClick={() => setShowAddForm(false)} className="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200">Cancel</button>
           </div>
         </form>
       )}
 
-      <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
-        <h3 className="text-lg font-black text-gray-950">Course Content</h3>
-        {lessons.length === 0 ? (
-          <p className="text-gray-500 py-4 text-center">No lessons added to this course yet.</p>
-        ) : (
-          <div className="space-y-3">
-            {lessons.map((lesson, index) => (
-              <div key={lesson._id || index} className="flex justify-between items-center p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
-                <div className="flex items-center gap-4">
-                  <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
-                    <PlayCircle size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">{lesson.title}</h4>
-                    <p className="text-xs font-semibold text-gray-500">{lesson.duration}</p>
-                  </div>
+      {showAddForm && addType === 'quiz' && (
+        <form onSubmit={handleAddQuiz} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm grid gap-5">
+          <h3 className="text-lg font-black text-gray-950">Add New Quiz</h3>
+          
+          <FormInput 
+            label="Quiz Title" 
+            name="title"
+            value={quizData.title}
+            onChange={(e) => setQuizData({...quizData, title: e.target.value})}
+            required
+            placeholder="e.g. Module 1 Quiz"
+          />
+
+          <div className="space-y-6">
+            {questions.map((q, qIndex) => (
+              <div key={qIndex} className="p-4 border border-gray-200 rounded-xl bg-gray-50 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-bold text-gray-800">Question {qIndex + 1}</h4>
+                  {questions.length > 1 && (
+                    <button type="button" onClick={() => setQuestions(questions.filter((_, i) => i !== qIndex))} className="text-red-500 text-xs font-bold hover:underline">Remove</button>
+                  )}
                 </div>
-                <button
-                  onClick={() => handleDeleteLesson(lesson._id)}
-                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
-                  title="Delete Lesson"
-                >
-                  <Trash2 size={18} />
-                </button>
+                
+                <FormInput 
+                  label="Question Text" 
+                  value={q.questionText}
+                  onChange={(e) => updateQuestion(qIndex, 'questionText', e.target.value)}
+                  required
+                />
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">Options</label>
+                  {q.options.map((opt, optIndex) => (
+                    <div key={optIndex} className="flex items-center gap-3">
+                      <input 
+                        type="radio" 
+                        name={`correct-${qIndex}`} 
+                        checked={q.correctAnswerIndex === optIndex} 
+                        onChange={() => updateQuestion(qIndex, 'correctAnswerIndex', optIndex)}
+                        className="w-4 h-4 text-blue-600"
+                        title="Mark as correct answer"
+                      />
+                      <input 
+                        type="text" 
+                        value={opt} 
+                        onChange={(e) => updateOption(qIndex, optIndex, e.target.value)} 
+                        className="flex-1 rounded-xl border border-gray-200 p-2 text-sm outline-none focus:border-blue-500" 
+                        placeholder={`Option ${optIndex + 1}`}
+                        required
+                      />
+                      {q.options.length > 2 && (
+                        <button type="button" onClick={() => {
+                          const newQ = [...questions];
+                          newQ[qIndex].options = newQ[qIndex].options.filter((_, i) => i !== optIndex);
+                          if (newQ[qIndex].correctAnswerIndex >= newQ[qIndex].options.length) {
+                            newQ[qIndex].correctAnswerIndex = 0;
+                          }
+                          setQuestions(newQ);
+                        }} className="text-red-500 hover:bg-red-50 p-1 rounded"><Trash2 size={16} /></button>
+                      )}
+                    </div>
+                  ))}
+                  <button type="button" onClick={() => addOption(qIndex)} className="text-blue-600 text-xs font-bold hover:underline">+ Add Option</button>
+                </div>
               </div>
             ))}
           </div>
-        )}
+
+          <button type="button" onClick={addQuestion} className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 font-bold hover:border-gray-400 hover:text-gray-800 transition">
+            + Add Another Question
+          </button>
+
+          <div className="flex gap-3 pt-4">
+            <button type="submit" disabled={uploading} className="px-6 py-2 bg-purple-600 text-white rounded-xl font-bold disabled:opacity-50">
+              {uploading ? 'Saving...' : 'Save Quiz'}
+            </button>
+            <button type="button" onClick={() => setShowAddForm(false)} className="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200">Cancel</button>
+          </div>
+        </form>
+      )}
+
+      <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
+        <div>
+          <h3 className="text-lg font-black text-gray-950 mb-3">Course Lessons</h3>
+          {lessons.length === 0 ? (
+            <p className="text-gray-500 text-sm italic">No lessons added to this course yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {lessons.map((lesson, index) => (
+                <div key={lesson._id || index} className="flex justify-between items-center p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
+                      <PlayCircle size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900">{lesson.title}</h4>
+                      <p className="text-xs font-semibold text-gray-500">{lesson.duration}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteLesson(lesson._id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                    title="Delete Lesson"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <h3 className="text-lg font-black text-gray-950 mb-3">Course Quizzes</h3>
+          {quizzes.length === 0 ? (
+            <p className="text-gray-500 text-sm italic">No quizzes added to this course yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {quizzes.map((quiz, index) => (
+                <div key={quiz._id || index} className="flex justify-between items-center p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-purple-100 text-purple-600 p-2 rounded-lg">
+                      <BookOpen size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900">{quiz.title}</h4>
+                      <p className="text-xs font-semibold text-gray-500">{quiz.questions?.length || 0} Questions</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
