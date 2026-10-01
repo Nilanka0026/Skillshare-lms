@@ -9,6 +9,7 @@ import { useCourse } from '../../../context/CourseContext.jsx';
 import { useAuth } from '../../../context/useAuth.js';
 import { authApi } from '../../../services/api.js';
 import { Link } from 'react-router-dom';
+import { StudyCalendar } from '../../../components/dashboard/StudyCalendar.jsx';
 
 export function StudentPage({ title, view }) {
   const { user } = useAuth();
@@ -97,6 +98,9 @@ function Overview({ myCourses }) {
         ) : (
           <p className="mt-3 text-sm text-gray-500">You are not actively enrolled in any courses yet. Browse our catalog to begin learning!</p>
         )}
+      </div>
+      <div className="mt-6">
+        <StudyCalendar myCourses={myCourses} />
       </div>
     </>
   );

@@ -24,6 +24,13 @@ const enrollmentSchema = new mongoose.Schema(
         ref: 'Lesson'
       }
     ],
+    quizResults: [
+      {
+        quizId: { type: mongoose.Schema.Types.ObjectId },
+        score: { type: Number },
+        total: { type: Number }
+      }
+    ],
     enrolledAt: {
       type: Date,
       default: Date.now

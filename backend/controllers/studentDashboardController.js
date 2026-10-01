@@ -8,10 +8,10 @@ const getStudentCourses = asyncHandler(async (req, res) => {
   const enrollments = await Enrollment.find({ student: req.user._id })
     .populate({
       path: 'course',
-      populate: {
-        path: 'instructor',
-        select: 'name email profileImage bio'
-      }
+      populate: [
+        { path: 'instructor', select: 'name email profileImage bio' },
+        { path: 'lessons' }
+      ]
     });
 
   const coursesWithProgress = enrollments
@@ -21,7 +21,9 @@ const getStudentCourses = asyncHandler(async (req, res) => {
       return {
         ...courseObj,
         progress: enrollment.progress || 0,
-        enrolledAt: enrollment.enrolledAt || enrollment.createdAt
+        enrolledAt: enrollment.enrolledAt || enrollment.createdAt,
+        completedLessons: enrollment.completedLessons || [],
+        quizResults: enrollment.quizResults || []
       };
     });
 
