@@ -11,20 +11,44 @@ const getCourses = asyncHandler(async (req, res) => {
     query.category = category;
   }
 
-  if (search) {
-    query.title = { $regex: search, $options: 'i' };
+  if (search && search.trim() !== '') {
+    const searchRegex = new RegExp(search.trim(), 'i');
+    query.$or = [
+      { title: searchRegex },
+      { description: searchRegex },
+      { category: searchRegex }
+    ];
   }
 
-  const courses = await Course.find(query)
-    .populate('instructor', 'name email profileImage')
+  let courses = await Course.find(query)
+    .populate('instructor', 'name email profileImage bio skills experience')
     .populate('lessons');
+
+  // If search matches instructor name, include those courses as well
+  if (search && search.trim() !== '') {
+    const searchLower = search.trim().toLowerCase();
+    const allCourses = await Course.find(category ? { category } : {})
+      .populate('instructor', 'name email profileImage bio skills experience')
+      .populate('lessons');
+
+    const matchedByInstructor = allCourses.filter((course) => {
+      const teacherName = course.instructor?.name || '';
+      return teacherName.toLowerCase().includes(searchLower);
+    });
+
+    const combinedMap = new Map();
+    [...courses, ...matchedByInstructor].forEach((c) => {
+      combinedMap.set(c._id.toString(), c);
+    });
+    courses = Array.from(combinedMap.values());
+  }
 
   res.json(courses);
 });
 
 const getCourseById = asyncHandler(async (req, res) => {
   const course = await Course.findById(req.params.id)
-    .populate('instructor', 'name email profileImage')
+    .populate('instructor', 'name email profileImage bio skills experience')
     .populate('lessons')
     .populate('studentsEnrolled', 'name email');
 
@@ -40,9 +64,12 @@ const getCourseById = asyncHandler(async (req, res) => {
 
 const getMyCourses = asyncHandler(async (req, res) => {
   const courses = await Course.find({
-    studentsEnrolled: req.user._id
+    $or: [
+      { studentsEnrolled: req.user._id },
+      { enrolledStudents: req.user._id }
+    ]
   })
-    .populate('instructor', 'name email profileImage')
+    .populate('instructor', 'name email profileImage bio skills experience')
     .populate('lessons');
 
   res.json(courses);
@@ -123,6 +150,13 @@ const addLesson = asyncHandler(async (req, res) => {
 
 const addReview = asyncHandler(async (req, res) => {
   const { comment, rating } = req.body;
+  const numRating = Number(rating);
+
+  if (!numRating || numRating < 1 || numRating > 5) {
+    res.status(400);
+    throw new Error('Please provide a valid rating between 1 and 5 stars');
+  }
+
   const course = await Course.findById(req.params.id);
 
   if (!course) {
@@ -130,16 +164,40 @@ const addReview = asyncHandler(async (req, res) => {
     throw new Error('Course not found');
   }
 
-  const review = await Review.create({
-    comment,
-    courseId: course._id,
-    rating,
-    userId: req.user._id
-  });
+  const userIdStr = req.user._id.toString();
+  const isEnrolled =
+    (course.studentsEnrolled && course.studentsEnrolled.some((id) => id.toString() === userIdStr)) ||
+    (course.enrolledStudents && course.enrolledStudents.some((id) => id.toString() === userIdStr));
+
+  if (!isEnrolled && req.user.role !== 'admin') {
+    res.status(403);
+    throw new Error('Only enrolled students can rate or review this course and teacher');
+  }
+
+  let review = await Review.findOne({ courseId: course._id, userId: req.user._id });
+
+  if (review) {
+    review.rating = numRating;
+    review.comment = comment || review.comment;
+    review.teacherId = course.instructor;
+    await review.save();
+  } else {
+    review = await Review.create({
+      comment: comment || '',
+      courseId: course._id,
+      teacherId: course.instructor,
+      rating: numRating,
+      userId: req.user._id
+    });
+  }
 
   const reviews = await Review.find({ courseId: course._id });
-  course.ratings.count = reviews.length;
-  course.ratings.average = reviews.reduce((sum, item) => sum + item.rating, 0) / reviews.length;
+  const avg = reviews.reduce((sum, item) => sum + item.rating, 0) / reviews.length;
+  const roundedAvg = Number(avg.toFixed(1));
+
+  course.ratings = { average: roundedAvg, count: reviews.length };
+  course.rating = roundedAvg;
+  course.reviewCount = reviews.length;
   await course.save();
 
   res.status(201).json(review);

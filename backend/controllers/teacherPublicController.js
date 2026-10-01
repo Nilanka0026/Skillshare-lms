@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Course = require('../models/Course');
+const Review = require('../models/Review');
 const asyncHandler = require('../utils/asyncHandler');
 
 // @desc    Get all teachers with calculated stats
@@ -11,23 +12,27 @@ const getTeachers = asyncHandler(async (req, res) => {
   const teachersWithStats = await Promise.all(
     teachers.map(async (teacher) => {
       const courses = await Course.find({ instructor: teacher._id });
+      const courseIds = courses.map((c) => c._id);
       
       const courseCount = courses.length;
       let studentCount = 0;
-      let ratingSum = 0;
-      let ratedCoursesCount = 0;
 
       courses.forEach((course) => {
         studentCount += course.enrolledStudents?.length || course.studentsEnrolled?.length || 0;
-        
-        const avg = course.rating || course.ratings?.average || 0;
-        if (avg > 0) {
-          ratingSum += avg;
-          ratedCoursesCount += 1;
-        }
       });
 
-      const averageRating = ratedCoursesCount > 0 ? Number((ratingSum / ratedCoursesCount).toFixed(1)) : 0;
+      const reviews = await Review.find({
+        $or: [
+          { teacherId: teacher._id },
+          { courseId: { $in: courseIds } }
+        ]
+      });
+
+      let averageRating = 0;
+      if (reviews.length > 0) {
+        const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+        averageRating = Number((sum / reviews.length).toFixed(1));
+      }
 
       return {
         _id: teacher._id,
@@ -39,7 +44,8 @@ const getTeachers = asyncHandler(async (req, res) => {
         experience: teacher.experience || '',
         courseCount,
         studentCount,
-        rating: averageRating || 5.0 // fallback default to make it look active
+        rating: averageRating,
+        reviewCount: reviews.length
       };
     })
   );
@@ -62,21 +68,25 @@ const getTeacherById = asyncHandler(async (req, res) => {
     .populate('instructor', 'name email profileImage')
     .populate('lessons');
 
+  const courseIds = courses.map((c) => c._id);
   let studentCount = 0;
-  let ratingSum = 0;
-  let ratedCoursesCount = 0;
 
   courses.forEach((course) => {
     studentCount += course.enrolledStudents?.length || course.studentsEnrolled?.length || 0;
-    
-    const avg = course.rating || course.ratings?.average || 0;
-    if (avg > 0) {
-      ratingSum += avg;
-      ratedCoursesCount += 1;
-    }
   });
 
-  const averageRating = ratedCoursesCount > 0 ? Number((ratingSum / ratedCoursesCount).toFixed(1)) : 5.0;
+  const reviews = await Review.find({
+    $or: [
+      { teacherId: teacher._id },
+      { courseId: { $in: courseIds } }
+    ]
+  }).populate('userId', 'name profileImage');
+
+  let averageRating = 0;
+  if (reviews.length > 0) {
+    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+    averageRating = Number((sum / reviews.length).toFixed(1));
+  }
 
   res.json({
     teacher: {
@@ -91,9 +101,11 @@ const getTeacherById = asyncHandler(async (req, res) => {
     stats: {
       courseCount: courses.length,
       studentCount,
-      rating: averageRating
+      rating: averageRating,
+      reviewCount: reviews.length
     },
-    courses
+    courses,
+    reviews
   });
 });
 

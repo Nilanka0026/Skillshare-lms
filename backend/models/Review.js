@@ -12,6 +12,10 @@ const reviewSchema = new mongoose.Schema(
       ref: 'Course',
       required: true
     },
+    teacherId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
     rating: {
       type: Number,
       required: true,
