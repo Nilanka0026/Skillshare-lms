@@ -1,6 +1,6 @@
 import { PlayCircle } from 'lucide-react';
 
-export function VideoPlayer({ src }) {
+export function VideoPlayer({ src, onEnded }) {
   if (!src) {
     return (
       <div className="grid aspect-video place-items-center rounded-2xl bg-gray-950 text-white">
@@ -20,6 +20,7 @@ export function VideoPlayer({ src }) {
         controls 
         className="w-full h-full"
         autoPlay
+        onEnded={onEnded}
       />
     </div>
   );

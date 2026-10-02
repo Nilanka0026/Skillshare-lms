@@ -7,6 +7,7 @@ const {
   getCourseById,
   getCourses,
   getMyCourses,
+  removeLesson,
   updateCourse
 } = require('../controllers/courseController');
 const { authorizeRoles, protect } = require('../middleware/authMiddleware');
@@ -25,6 +26,9 @@ router.route('/:id')
   .delete(protect, authorizeRoles('instructor', 'admin'), deleteCourse);
 
 router.post('/:id/lessons', protect, authorizeRoles('instructor', 'admin'), addLesson);
+router.delete('/:id/lessons/:lessonId', protect, authorizeRoles('instructor', 'admin'), removeLesson);
+router.post('/:id/quizzes', protect, authorizeRoles('instructor', 'admin'), require('../controllers/courseController').addQuiz);
 router.post('/:id/reviews', protect, authorizeRoles('student'), addReview);
+router.post('/:id/quizzes/:quizId/submit', protect, authorizeRoles('student'), require('../controllers/courseController').submitQuiz);
 
 module.exports = router;

@@ -107,4 +107,34 @@ const unenrollFromCourse = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { enrollInCourse, unenrollFromCourse };
+const checkEnrollmentStatus = asyncHandler(async (req, res) => {
+  const enrollment = await Enrollment.findOne({
+    student: req.user._id,
+    course: req.params.courseId
+  });
+  if (!enrollment) {
+    return res.status(404).json({ message: 'Not enrolled' });
+  }
+  res.json(enrollment);
+});
+
+const completeLesson = asyncHandler(async (req, res) => {
+  const { courseId, lessonId } = req.params;
+  const enrollment = await Enrollment.findOne({ student: req.user._id, course: courseId });
+  if (!enrollment) {
+    res.status(404);
+    throw new Error('Enrollment not found');
+  }
+
+  if (!enrollment.completedLessons.includes(lessonId)) {
+    enrollment.completedLessons.push(lessonId);
+    
+    // optionally update enrollment.progress based on total lessons in course
+    // But since we calculate on frontend, we can just save it.
+    await enrollment.save();
+  }
+
+  res.json({ message: 'Lesson marked as complete', completedLessons: enrollment.completedLessons });
+});
+
+module.exports = { enrollInCourse, unenrollFromCourse, checkEnrollmentStatus, completeLesson };

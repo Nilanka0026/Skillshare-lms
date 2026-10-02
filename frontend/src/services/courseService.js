@@ -11,6 +11,8 @@ export const courseService = {
   update: (id, payload) => apiClient.put(`/courses/${id}`, payload),
   remove: (id) => apiClient.delete(`/courses/${id}`),
   addLesson: (courseId, payload) => apiClient.post(`/courses/${courseId}/lessons`, payload),
+  removeLesson: (courseId, lessonId) => apiClient.delete(`/courses/${courseId}/lessons/${lessonId}`),
+  addQuiz: (courseId, payload) => apiClient.post(`/courses/${courseId}/quizzes`, payload),
   addReview: (courseId, payload) => apiClient.post(`/courses/${courseId}/reviews`, payload),
   uploadVideo: (file) => {
     const formData = new FormData();
@@ -26,7 +28,8 @@ export const courseService = {
   teacherUpdate: (id, payload) => apiClient.put(`/teacher/courses/${id}`, payload),
   teacherRemove: (id) => apiClient.delete(`/teacher/courses/${id}`),
   teacherStudents: (courseId) => apiClient.get(`/teacher/students/${courseId}`),
-  teacherAnalytics: () => apiClient.get('/teacher/analytics')
+  teacherAnalytics: () => apiClient.get('/teacher/analytics'),
+  submitQuiz: (courseId, quizId, answers) => apiClient.post(`/courses/${courseId}/quizzes/${quizId}/submit`, { answers })
 };
 
 export default courseService;

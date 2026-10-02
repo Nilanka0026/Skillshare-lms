@@ -1,12 +1,43 @@
-import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
-import { createElement } from 'react';
+import { useEffect, useState, createElement } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, CheckCircle2, Search } from 'lucide-react';
 import { CourseCard } from '../../components/common/CourseCard.jsx';
-import { InstructorCard } from '../../components/common/InstructorCard.jsx';
 import { ReviewCard } from '../../components/common/ReviewCard.jsx';
-import { categories, courses, faqs, instructors, stats, testimonials } from '../../data/platformData.js';
+import { categories, faqs, stats, testimonials } from '../../data/platformData.js';
+import { courseApi } from '../../services/api.js';
+import apiClient from '../../services/apiClient.js';
 
 export function Home() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [featuredCourses, setFeaturedCourses] = useState([]);
+  const [topTeachers, setTopTeachers] = useState([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    courseApi.list()
+      .then((data) => {
+        setFeaturedCourses(data);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch featured courses:', err);
+      })
+      .finally(() => setLoadingCourses(false));
+
+    apiClient.get('/teachers')
+      .then((data) => setTopTeachers(data.slice(0, 3)))
+      .catch(() => {});
+  }, []);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate('/courses');
+    }
+  };
+
   return (
     <>
       <section 
@@ -33,7 +64,7 @@ export function Home() {
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <span 
-              className="rounded-full border px-4 py-2 text-sm font-bold animate-pulse"
+              className="rounded-full border px-4 py-2 text-sm font-bold animate-pulse inline-block"
               style={{ 
                 backgroundColor: 'rgba(59, 130, 246, 0.2)', 
                 borderColor: 'rgba(59, 130, 246, 0.3)', 
@@ -54,17 +85,38 @@ export function Home() {
             >
               The Engineering Skill Sharing Platform connects students and staff across all engineering departments to learn, teach, and grow together.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+
+            {/* Homepage Search Bar */}
+            <form onSubmit={handleSearchSubmit} className="mt-8 flex flex-col sm:flex-row gap-3 max-w-2xl">
+              <div className="relative flex-1">
+                <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search courses by keyword, topic, or teacher..."
+                  className="w-full rounded-xl border border-gray-700 bg-gray-900/90 py-3.5 pl-12 pr-4 text-white outline-none placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"
+                />
+              </div>
+              <button
+                type="submit"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 font-bold text-white hover:bg-blue-700 transition duration-200 shadow-lg cursor-pointer"
+              >
+                Search Courses
+              </button>
+            </form>
+
+            <div className="mt-6 flex flex-wrap gap-3">
               <Link 
                 to="/courses" 
-                className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold hover:bg-blue-700 transition-colors duration-200"
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold hover:bg-blue-700 transition-colors duration-200"
                 style={{ color: '#ffffff' }}
               >
-                Browse Courses <ArrowRight size={18} style={{ color: '#ffffff' }} />
+                Browse All Courses <ArrowRight size={16} style={{ color: '#ffffff' }} />
               </Link>
               <Link 
                 to="/register" 
-                className="inline-flex min-h-12 items-center rounded-xl px-6 py-3 font-semibold transition-colors duration-200 hover:bg-[rgba(255,255,255,0.2)]"
+                className="inline-flex min-h-11 items-center rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors duration-200 hover:bg-[rgba(255,255,255,0.2)]"
                 style={{ 
                   border: '1px solid rgba(255, 255, 255, 0.2)', 
                   backgroundColor: 'rgba(255, 255, 255, 0.1)', 
@@ -91,9 +143,19 @@ export function Home() {
       </section>
 
       <Section title="Featured Courses" action="/courses">
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {courses.slice(0, 3).map((course) => <CourseCard key={course.id} course={course} />)}
-        </div>
+        {loadingCourses ? (
+          <div className="py-12 text-center text-sm font-semibold text-gray-500">Loading actual courses...</div>
+        ) : featuredCourses.length === 0 ? (
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 text-center text-gray-500">
+            No published courses available right now. Check back soon!
+          </div>
+        ) : (
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {featuredCourses.slice(0, 6).map((course) => (
+              <CourseCard key={course._id || course.id} course={course} />
+            ))}
+          </div>
+        )}
       </Section>
 
       <section className="bg-gray-50 dark:bg-gray-900/30 transition-colors duration-300">
@@ -111,11 +173,33 @@ export function Home() {
         </div>
       </section>
 
-      <Section title="Top Instructors" action="/instructors">
-        <div className="grid gap-5 md:grid-cols-3">
-          {instructors.map((instructor) => <InstructorCard key={instructor.name} instructor={instructor} />)}
-        </div>
-      </Section>
+      {topTeachers.length > 0 && (
+        <Section title="Top Instructors" action="/teachers">
+          <div className="grid gap-5 md:grid-cols-3">
+            {topTeachers.map((teacher) => (
+              <article key={teacher._id} className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-blue-600 text-xl font-black text-white">
+                    {teacher.profileImage ? (
+                      <img src={teacher.profileImage} alt={teacher.name} className="h-full w-full rounded-2xl object-cover" />
+                    ) : (
+                      teacher.name[0]
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-black text-gray-950 dark:text-white">{teacher.name}</h3>
+                    <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{teacher.experience || 'Educator'}</p>
+                  </div>
+                </div>
+                <p className="mt-4 line-clamp-2 text-sm text-gray-600 dark:text-gray-300">{teacher.bio || 'Experienced software professional and teacher.'}</p>
+                <Link to={`/teachers/${teacher._id}`} className="mt-4 inline-block text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                  View Profile &rarr;
+                </Link>
+              </article>
+            ))}
+          </div>
+        </Section>
+      )}
 
       <section className="bg-gray-50 dark:bg-gray-900/30 transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">

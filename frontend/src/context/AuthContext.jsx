@@ -59,8 +59,9 @@ export function AuthProvider({ children }) {
     logout,
     register,
     roleHome,
-    user
-  }), [authLoading, login, logout, register, user]);
+    user,
+    updateUser: persistUser
+  }), [authLoading, login, logout, register, user, persistUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

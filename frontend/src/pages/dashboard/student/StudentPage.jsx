@@ -7,7 +7,9 @@ import { Toast } from '../../../components/common/Toast.jsx';
 import { courses as mockCourses } from '../../../data/platformData.js';
 import { useCourse } from '../../../context/CourseContext.jsx';
 import { useAuth } from '../../../context/useAuth.js';
+import { authApi } from '../../../services/api.js';
 import { Link } from 'react-router-dom';
+import { StudyCalendar } from '../../../components/dashboard/StudyCalendar.jsx';
 
 export function StudentPage({ title, view }) {
   const { user } = useAuth();
@@ -97,6 +99,9 @@ function Overview({ myCourses }) {
           <p className="mt-3 text-sm text-gray-500">You are not actively enrolled in any courses yet. Browse our catalog to begin learning!</p>
         )}
       </div>
+      <div className="mt-6">
+        <StudyCalendar myCourses={myCourses} />
+      </div>
     </>
   );
 }
@@ -170,9 +175,47 @@ function Notifications() {
 }
 
 function Profile({ initialUser }) {
+  const { updateUser } = useAuth();
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const uploadRes = await authApi.uploadImage(file);
+      const imageUrl = `http://localhost:5000${uploadRes.data || uploadRes}`; 
+      const updatedUser = await authApi.updateProfile({ profileImage: imageUrl });
+      updateUser(updatedUser.data || updatedUser);
+      alert('Profile picture updated successfully!');
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <form className="grid max-w-2xl gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <Settings className="text-blue-600" />
+      <div className="flex items-center gap-4 mb-4">
+        <img 
+          src={initialUser?.profileImage || 'https://via.placeholder.com/150'} 
+          alt="Profile" 
+          className="w-20 h-20 rounded-full object-cover border"
+        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Update Profile Picture</label>
+          <input 
+            type="file" 
+            accept="image/*"
+            onChange={handleImageUpload}
+            disabled={uploading}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+        </div>
+      </div>
       <FormInput label="Full Name" name="name" value={initialUser?.name || ''} placeholder="Demo User" readOnly />
       <FormInput label="Email" name="email" value={initialUser?.email || ''} placeholder="demo@skillshare.test" readOnly />
       <p className="text-xs text-gray-400 mt-2">Profile modifications are restricted under test mode.</p>

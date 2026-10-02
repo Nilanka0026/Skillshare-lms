@@ -2,11 +2,19 @@ import apiClient from './apiClient';
 import authService from './authService';
 import courseService from './courseService';
 import adminService from './adminService';
+import { enrollmentService } from './enrollmentService';
 
 export const authApi = {
   login: (payload) => authService.login(payload),
   register: (payload) => authService.register(payload),
-  me: () => authService.me()
+  me: () => authService.me(),
+  updateProfile: (payload) => authService.updateProfile(payload),
+  uploadImage: (file) => authService.uploadImage(file)
+};
+
+export const enrollmentApi = {
+  checkStatus: (courseId) => enrollmentService.checkStatus(courseId),
+  markLessonComplete: (courseId, lessonId) => enrollmentService.markLessonComplete(courseId, lessonId)
 };
 
 export const courseApi = {
@@ -16,7 +24,10 @@ export const courseApi = {
   create: (payload) => courseService.create(payload),
   remove: (id) => courseService.remove(id),
   addLesson: (courseId, payload) => courseService.addLesson(courseId, payload),
+  removeLesson: (courseId, lessonId) => courseService.removeLesson(courseId, lessonId),
+  addQuiz: (courseId, payload) => courseService.addQuiz(courseId, payload),
   uploadVideo: (file) => courseService.uploadVideo(file),
+  submitQuiz: (courseId, quizId, answers) => courseService.submitQuiz(courseId, quizId, answers),
   
   // Teacher functions
   teacherCourses: () => courseService.teacherCourses(),

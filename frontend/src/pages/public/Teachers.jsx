@@ -94,8 +94,8 @@ export function Teachers() {
                   {teacher.studentCount.toLocaleString()} students
                 </span>
                 <span className="flex items-center gap-1.5 font-bold text-amber-600">
-                  <Star size={16} className="fill-amber-500 text-amber-500" />
-                  {teacher.rating || 5.0}
+                  <Star size={16} className={teacher.rating > 0 ? "fill-amber-500 text-amber-500" : "text-gray-300"} />
+                  {teacher.rating > 0 ? `${teacher.rating} (${teacher.reviewCount || 0})` : 'No ratings yet'}
                 </span>
               </div>
 
