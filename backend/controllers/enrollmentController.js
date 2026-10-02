@@ -2,6 +2,7 @@ const Enrollment = require('../models/Enrollment');
 const Course = require('../models/Course');
 const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
+const updateCourseProgress = require('../utils/courseProgress');
 
 // @desc    Enroll in a course
 // @route   POST /api/enroll/:courseId
@@ -120,21 +121,37 @@ const checkEnrollmentStatus = asyncHandler(async (req, res) => {
 
 const completeLesson = asyncHandler(async (req, res) => {
   const { courseId, lessonId } = req.params;
+  const course = await Course.findById(courseId);
+  if (!course) {
+    res.status(404);
+    throw new Error('Course not found');
+  }
+
   const enrollment = await Enrollment.findOne({ student: req.user._id, course: courseId });
   if (!enrollment) {
     res.status(404);
     throw new Error('Enrollment not found');
   }
 
-  if (!enrollment.completedLessons.includes(lessonId)) {
-    enrollment.completedLessons.push(lessonId);
-    
-    // optionally update enrollment.progress based on total lessons in course
-    // But since we calculate on frontend, we can just save it.
-    await enrollment.save();
+  const lessonBelongsToCourse = course.lessons.some((id) => id.toString() === lessonId);
+  if (!lessonBelongsToCourse) {
+    res.status(404);
+    throw new Error('Lesson not found in this course');
   }
 
-  res.json({ message: 'Lesson marked as complete', completedLessons: enrollment.completedLessons });
+  if (!enrollment.completedLessons.some((completedLessonId) => completedLessonId.toString() === lessonId)) {
+    enrollment.completedLessons.push(lessonId);
+  }
+
+  const certificate = await updateCourseProgress(enrollment, course);
+  res.json({
+    message: 'Lesson marked as complete',
+    completedLessons: enrollment.completedLessons,
+    progress: enrollment.progress,
+    isCompleted: enrollment.isCompleted,
+    completedAt: enrollment.completedAt,
+    certificateId: certificate?.certificateId
+  });
 });
 
 module.exports = { enrollInCourse, unenrollFromCourse, checkEnrollmentStatus, completeLesson };

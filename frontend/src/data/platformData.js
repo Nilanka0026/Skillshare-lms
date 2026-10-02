@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Award,
   BookOpen,
   BriefcaseBusiness,
   CreditCard,
@@ -126,6 +127,7 @@ export const stats = [
 export const studentLinks = [
   ['Overview', '/dashboard/student', LayoutDashboard],
   ['My Courses', '/dashboard/student/my-courses', BookOpen],
+  ['My Certificates', '/dashboard/student/certificates', Award],
   ['Profile Settings', '/dashboard/student/profile', Settings]
 ];
 

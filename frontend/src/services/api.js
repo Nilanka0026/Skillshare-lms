@@ -17,6 +17,12 @@ export const enrollmentApi = {
   markLessonComplete: (courseId, lessonId) => enrollmentService.markLessonComplete(courseId, lessonId)
 };
 
+export const certificateApi = {
+  mine: () => apiClient.get('/certificates/mine'),
+  get: (certificateId) => apiClient.get(`/certificates/${certificateId}`),
+  verify: (certificateId) => apiClient.get(`/certificates/verify/${certificateId}`)
+};
+
 export const courseApi = {
   list: (params = {}) => courseService.list(params),
   details: (id) => courseService.details(id),
