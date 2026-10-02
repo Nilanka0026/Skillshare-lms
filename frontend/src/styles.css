@@ -160,3 +160,59 @@ img {
     color: #f3f4f6 !important;
   }
 }
+
+.certificate-print {
+  position: relative;
+  display: flex;
+  min-height: 560px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 8px double #0f766e;
+  background: #fff;
+  padding: 3.5rem;
+  text-align: center;
+  color: #17343a;
+  box-shadow: 0 18px 50px rgb(15 23 42 / 12%);
+}
+
+.certificate-print::before {
+  position: absolute;
+  inset: 10px;
+  border: 1px solid #c4a65a;
+  content: "";
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .certificate-print {
+    min-height: 500px;
+    padding: 2rem 1.25rem;
+  }
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 12mm;
+  }
+
+  body,
+  #root {
+    min-width: 0;
+    background: #fff !important;
+  }
+
+  .certificate-actions {
+    display: none !important;
+  }
+
+  .certificate-print {
+    min-height: 175mm;
+    break-inside: avoid;
+    border-width: 8px;
+    box-shadow: none;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

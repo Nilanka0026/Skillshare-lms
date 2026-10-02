@@ -21,6 +21,8 @@ const getStudentCourses = asyncHandler(async (req, res) => {
       return {
         ...courseObj,
         progress: enrollment.progress || 0,
+        isCompleted: enrollment.isCompleted || false,
+        completedAt: enrollment.completedAt || null,
         enrolledAt: enrollment.enrolledAt || enrollment.createdAt,
         completedLessons: enrollment.completedLessons || [],
         quizResults: enrollment.quizResults || []
