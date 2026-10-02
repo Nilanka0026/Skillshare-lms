@@ -3,6 +3,7 @@ const Lesson = require('../models/Lesson');
 const Review = require('../models/Review');
 const Enrollment = require('../models/Enrollment');
 const asyncHandler = require('../utils/asyncHandler');
+const updateCourseProgress = require('../utils/courseProgress');
 
 const getCourses = asyncHandler(async (req, res) => {
   const { category, search } = req.query;
@@ -288,6 +289,15 @@ const submitQuiz = asyncHandler(async (req, res) => {
     throw new Error('Quiz not found');
   }
 
+  if (!Array.isArray(answers)
+    || answers.length !== quiz.questions.length
+    || answers.some((answer, index) => !Number.isInteger(answer)
+      || answer < 0
+      || answer >= quiz.questions[index].options.length)) {
+    res.status(400);
+    throw new Error('Please answer every quiz question');
+  }
+
   let score = 0;
   const results = quiz.questions.map((q, i) => {
     const isCorrect = answers[i] === q.correctAnswerIndex;
@@ -315,12 +325,16 @@ const submitQuiz = asyncHandler(async (req, res) => {
     enrollment.quizResults.push({ quizId, score, total: quiz.questions.length });
   }
 
-  await enrollment.save();
+  const certificate = await updateCourseProgress(enrollment, course);
 
   res.json({
     score,
     total: quiz.questions.length,
-    results
+    results,
+    progress: enrollment.progress,
+    isCompleted: enrollment.isCompleted,
+    completedAt: enrollment.completedAt,
+    certificateId: certificate?.certificateId
   });
 });
 

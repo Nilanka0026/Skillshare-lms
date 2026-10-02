@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Award, BookOpen, Clock, Heart, Settings } from 'lucide-react';
+import { Award, BookOpen, Clock, ExternalLink, Heart, Printer, Settings } from 'lucide-react';
 import { CourseCard } from '../../../components/common/CourseCard.jsx';
 import { DashboardCard } from '../../../components/common/DashboardCard.jsx';
 import { FormInput } from '../../../components/common/FormInput.jsx';
@@ -7,7 +7,7 @@ import { Toast } from '../../../components/common/Toast.jsx';
 import { courses as mockCourses } from '../../../data/platformData.js';
 import { useCourse } from '../../../context/CourseContext.jsx';
 import { useAuth } from '../../../context/useAuth.js';
-import { authApi } from '../../../services/api.js';
+import { authApi, certificateApi } from '../../../services/api.js';
 import { Link } from 'react-router-dom';
 import { StudyCalendar } from '../../../components/dashboard/StudyCalendar.jsx';
 
@@ -167,7 +167,47 @@ function CourseGrid({ courses, title, onUnenroll }) {
 }
 
 function Certificates() {
-  return <div className="grid gap-4 md:grid-cols-3">{['Design Basics', 'MERN Starter', 'Marketing Systems'].map((item) => <div key={item} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"><Award className="text-blue-600" /><h3 className="mt-4 font-black">{item}</h3><p className="mt-2 text-sm text-gray-600">Certificate ready to download.</p></div>)}</div>;
+  const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    certificateApi.mine()
+      .then(setCertificates)
+      .catch((apiError) => setError(apiError.message || 'Unable to load certificates.'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p className="text-sm font-semibold text-gray-500">Loading certificates...</p>;
+  if (error) return <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p>;
+  if (!certificates.length) return <p className="rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-600">Complete every lesson and quiz in a course to earn a certificate.</p>;
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      {certificates.map((certificate) => (
+        <article key={certificate.certificateId} className="rounded-lg border border-gray-200 bg-white p-5">
+          <div className="flex items-start gap-4">
+            <Award aria-hidden="true" className="mt-1 shrink-0 text-teal-700" />
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg font-black text-gray-950">{certificate.courseName}</h2>
+              <p className="mt-1 text-sm text-gray-600">Awarded to {certificate.studentName}</p>
+              <p className="text-sm text-gray-600">Instructor: {certificate.instructorName}</p>
+              <p className="mt-3 text-xs text-gray-500">Completed {new Date(certificate.completionDate).toLocaleDateString()}</p>
+              <p className="mt-1 break-all font-mono text-xs text-gray-500">ID: {certificate.certificateId}</p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link to={`/certificate/${certificate.certificateId}`} className="inline-flex items-center gap-2 rounded-md bg-teal-800 px-3 py-2 text-sm font-bold text-white hover:bg-teal-900">
+                  <ExternalLink size={16} /> View Certificate
+                </Link>
+                <Link to={`/certificate/${certificate.certificateId}?print=1`} className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-bold text-gray-800 hover:bg-gray-50">
+                  <Printer size={16} /> Print / Save PDF
+                </Link>
+              </div>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
 }
 
 function Notifications() {

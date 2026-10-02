@@ -24,6 +24,7 @@ import { PaymentProcessing } from '../pages/payment/PaymentProcessing.jsx';
 import { PaymentSuccess } from '../pages/payment/PaymentSuccess.jsx';
 import { LearningPage } from '../pages/dashboard/student/LearningPage.jsx';
 import { StudentPage } from '../pages/dashboard/student/StudentPage.jsx';
+import { CertificatePage } from '../pages/certificates/CertificatePage.jsx';
 import { InstructorPage } from '../pages/dashboard/instructor/InstructorPage.jsx';
 import { AdminPage } from '../pages/dashboard/admin/AdminPage.jsx';
 import { NotFound } from '../pages/public/NotFound.jsx';
@@ -98,6 +99,13 @@ export function AppRoutes() {
             <Route path="reports" element={<AdminPage title="Reports & Analytics" view="reports" />} />
             <Route path="settings" element={<AdminPage title="Platform Settings" view="settings" />} />
           </Route>
+        </Route>
+      </Route>
+
+      <Route path="certificate/verify/:certificateId" element={<CertificatePage publicVerification />} />
+      <Route element={<RoleBasedRoute allowedRoles={['student']} />}>
+        <Route element={<ProtectedRoute />}>
+          <Route path="certificate/:certificateId" element={<CertificatePage />} />
         </Route>
       </Route>
 
