@@ -164,8 +164,21 @@ const startQuizAttempt = asyncHandler(async (req, res) => {
   if (quiz.startsAt && now < quiz.startsAt) fail(res, 403, 'This quiz is not open yet');
   if (quiz.endsAt && now > quiz.endsAt) fail(res, 403, 'The quiz submission window has ended');
 
-  const enrollment = await Enrollment.findOne({ student: req.user._id, course: courseId });
-  if (!enrollment) fail(res, 403, 'You must be enrolled in this course to attempt its quizzes');
+  let enrollment = await Enrollment.findOne({ student: req.user._id, course: courseId });
+  if (!enrollment) {
+    const studentId = req.user._id.toString();
+    const isLegacyEnrollment = [course.studentsEnrolled, course.enrolledStudents]
+      .some((students) => students.some((student) => student.toString() === studentId));
+    if (!isLegacyEnrollment) fail(res, 403, 'You must be enrolled in this course to attempt its quizzes');
+
+    enrollment = await Enrollment.create({
+      student: req.user._id,
+      course: courseId,
+      progress: 0,
+      completedLessons: [],
+      enrolledAt: new Date()
+    });
+  }
 
   const attemptCount = await QuizAttempt.countDocuments({
     student: req.user._id,
@@ -204,7 +217,10 @@ const startQuizAttempt = asyncHandler(async (req, res) => {
     totalMarks: attempt.totalMarks,
     startedAt: attempt.startedAt,
     deadlineAt: attempt.deadlineAt,
-    questions: attempt.questions.map(({ correctAnswerIndex, ...question }) => question)
+    questions: attempt.questions.map((question) => {
+      const { correctAnswerIndex, ...safeQuestion } = question.toObject();
+      return safeQuestion;
+    })
   });
 });
 
