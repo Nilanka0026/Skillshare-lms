@@ -142,15 +142,15 @@ export function ChatbotPage() {
 
     return parts.map((part) => {
       if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={key++} className="font-bold text-gray-900">{part.slice(2, -2)}</strong>;
+        return <strong key={key++} className="font-bold text-gray-900 dark:text-white">{part.slice(2, -2)}</strong>;
       }
       if (part.startsWith('`') && part.endsWith('`')) {
-        return <code key={key++} className="bg-gray-150 text-rose-600 px-1.5 py-0.5 rounded font-mono text-xs border border-gray-250">{part.slice(1, -1)}</code>;
+        return <code key={key++} className="bg-gray-150 dark:bg-gray-800 text-rose-600 dark:text-rose-400 px-1.5 py-0.5 rounded font-mono text-xs border border-gray-250 dark:border-gray-700">{part.slice(1, -1)}</code>;
       }
       const linkMatch = part.match(/^\[(.*?)\]\((.*?)\)$/);
       if (linkMatch) {
         return (
-          <a key={key++} href={linkMatch[2]} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline hover:text-blue-700 font-medium">
+          <a key={key++} href={linkMatch[2]} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-700 dark:hover:text-blue-300 font-medium">
             {linkMatch[1]}
           </a>
         );
@@ -200,20 +200,20 @@ export function ChatbotPage() {
 
       // Headers
       if (line.startsWith('### ')) {
-        renderedElements.push(<h4 key={key++} className="text-sm font-bold text-gray-900 mt-4 mb-2">{parseInlineStyles(line.substring(4))}</h4>);
+        renderedElements.push(<h4 key={key++} className="text-sm font-bold text-gray-900 dark:text-white mt-4 mb-2">{parseInlineStyles(line.substring(4))}</h4>);
         continue;
       } else if (line.startsWith('## ')) {
-        renderedElements.push(<h3 key={key++} className="text-base font-extrabold text-gray-900 mt-5 mb-2 border-b border-gray-200 pb-1">{parseInlineStyles(line.substring(3))}</h3>);
+        renderedElements.push(<h3 key={key++} className="text-base font-extrabold text-gray-900 dark:text-white mt-5 mb-2 border-b border-gray-200 dark:border-gray-800 pb-1">{parseInlineStyles(line.substring(3))}</h3>);
         continue;
       } else if (line.startsWith('# ')) {
-        renderedElements.push(<h2 key={key++} className="text-lg font-black text-gray-950 mt-6 mb-3">{parseInlineStyles(line.substring(2))}</h2>);
+        renderedElements.push(<h2 key={key++} className="text-lg font-black text-gray-950 dark:text-white mt-6 mb-3">{parseInlineStyles(line.substring(2))}</h2>);
         continue;
       }
 
       // Unordered lists
       if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
         renderedElements.push(
-          <ul key={key++} className="list-disc list-inside space-y-1 my-1.5 pl-2 text-gray-700">
+          <ul key={key++} className="list-disc list-inside space-y-1 my-1.5 pl-2 text-gray-700 dark:text-gray-300">
             <li className="text-xs leading-relaxed">{parseInlineStyles(line.trim().substring(2))}</li>
           </ul>
         );
@@ -224,7 +224,7 @@ export function ChatbotPage() {
       const numberedListMatch = line.trim().match(/^(\d+)\.\s(.*)/);
       if (numberedListMatch) {
         renderedElements.push(
-          <ol key={key++} className="list-decimal list-inside space-y-1 my-1.5 pl-2 text-gray-700">
+          <ol key={key++} className="list-decimal list-inside space-y-1 my-1.5 pl-2 text-gray-700 dark:text-gray-300">
             <li value={numberedListMatch[1]} className="text-xs leading-relaxed">{parseInlineStyles(numberedListMatch[2])}</li>
           </ol>
         );
@@ -234,7 +234,7 @@ export function ChatbotPage() {
       if (line.trim() === '') continue;
 
       renderedElements.push(
-        <p key={key++} className="leading-relaxed text-xs text-gray-700 mb-2">
+        <p key={key++} className="leading-relaxed text-xs text-gray-700 dark:text-gray-300 mb-2">
           {parseInlineStyles(line)}
         </p>
       );
@@ -252,57 +252,57 @@ export function ChatbotPage() {
   };
 
   return (
-    <section className="bg-white border-t border-gray-150 h-[calc(100vh-65px)] flex items-stretch overflow-hidden">
+    <section className="bg-white dark:bg-gray-950 border-t border-gray-150 dark:border-gray-800 h-[calc(100vh-65px)] flex items-stretch overflow-hidden transition-colors duration-300">
       
-      {/* Sidebar - Recreated matching layout with White/Gray Theme */}
-      <div className="hidden md:flex w-64 bg-slate-50 border-r border-gray-200 flex-col shrink-0 text-gray-800 select-none">
+      {/* Sidebar - Recreated matching layout with Dark Mode Support */}
+      <div className="hidden md:flex w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-col shrink-0 text-gray-800 dark:text-gray-200 select-none transition-colors duration-300">
         
         {/* Brand Name / Header */}
-        <div className="p-5 border-b border-gray-200/60 flex items-center gap-2">
+        <div className="p-5 border-b border-gray-200/60 dark:border-gray-800 flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-teal-550 flex items-center justify-center text-white">
             <Bot size={18} />
           </div>
-          <span className="font-extrabold text-sm tracking-tight text-gray-900">SkillShare Chat</span>
+          <span className="font-extrabold text-sm tracking-tight text-gray-900 dark:text-white">SkillShare Chat</span>
         </div>
 
         {/* Navigation Items (similar to Alibble layout) */}
         <div className="flex-1 overflow-y-auto p-3 space-y-1">
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold bg-blue-50/70 text-blue-600 cursor-pointer">
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold bg-blue-50/70 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 cursor-pointer">
             <Bot size={16} />
             AI Chat
           </button>
           
-          <Link to={`${dashboardPath}/profile`} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <Link to={`${dashboardPath}/profile`} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors">
             <User size={16} />
             Profile
           </Link>
           
-          <Link to={`${dashboardPath}`} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <Link to={`${dashboardPath}`} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors">
             <LayoutDashboard size={16} />
             Dashboard
           </Link>
 
-          <Link to={`${dashboardPath}`} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <Link to={`${dashboardPath}`} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors">
             <Settings size={16} />
             Settings
           </Link>
 
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors text-left cursor-pointer">
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-left cursor-pointer">
             <Compass size={16} />
             Explore Tools
           </button>
 
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors text-left cursor-pointer">
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-left cursor-pointer">
             <HelpCircle size={16} />
             Planner & FAQ
           </button>
         </div>
 
         {/* Log Out at bottom (matching Alibble layout) */}
-        <div className="p-3 border-t border-gray-200 bg-gray-50/50">
+        <div className="p-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
           <button
             onClick={logout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50/60 transition-all cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50/60 dark:hover:bg-rose-950/30 transition-all cursor-pointer"
           >
             <LogOut size={16} />
             Log out
@@ -311,12 +311,12 @@ export function ChatbotPage() {
       </div>
 
       {/* Main Workspace Pane */}
-      <div className="flex-1 flex flex-col bg-white overflow-hidden relative">
+      <div className="flex-1 flex flex-col bg-white dark:bg-gray-950 overflow-hidden relative transition-colors duration-300">
         
         {/* Upper Header */}
-        <div className="h-14 border-b border-gray-200 flex items-center justify-between px-6 bg-white shrink-0">
+        <div className="h-14 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 bg-white dark:bg-gray-950 shrink-0">
           <div className="flex items-center gap-2">
-            <h2 className="text-xs font-bold text-gray-800">
+            <h2 className="text-xs font-bold text-gray-800 dark:text-gray-200">
               AI SkillShare Chat
             </h2>
           </div>
@@ -325,7 +325,7 @@ export function ChatbotPage() {
             <button
               onClick={() => { setMessages([]); setDemoMode(false); setError(null); }}
               disabled={loading || messages.length === 0}
-              className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-[11px] font-semibold text-gray-600 rounded-lg transition-all cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 text-[11px] font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-all cursor-pointer disabled:opacity-50"
             >
               <Plus size={13} />
               New chat
@@ -333,7 +333,7 @@ export function ChatbotPage() {
             <button
               onClick={handleClearHistory}
               disabled={loading || messages.length === 0}
-              className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-[11px] font-semibold text-gray-600 rounded-lg transition-all cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 text-[11px] font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-all cursor-pointer disabled:opacity-50"
             >
               <Trash2 size={13} />
               Clear history
@@ -342,18 +342,18 @@ export function ChatbotPage() {
         </div>
 
         {/* Scrollable chat body */}
-        <div className="flex-1 overflow-y-auto px-6 py-8 scrollbar-thin bg-white">
+        <div className="flex-1 overflow-y-auto px-6 py-8 scrollbar-thin bg-white dark:bg-gray-950">
           
           <div className="max-w-2xl mx-auto w-full flex flex-col h-full">
             {error && (
-              <div className="flex items-center gap-2 rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-600 shrink-0 mb-4 animate-fade-in">
+              <div className="flex items-center gap-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 p-3 text-xs text-rose-600 dark:text-rose-400 shrink-0 mb-4 animate-fade-in">
                 <AlertCircle size={14} className="shrink-0" />
                 <p className="flex-1">{error}</p>
               </div>
             )}
 
             {demoMode && (
-              <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-700 shrink-0 mb-4 animate-fade-in">
+              <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 p-3 text-xs text-amber-700 dark:text-amber-400 shrink-0 mb-4 animate-fade-in">
                 <AlertCircle size={14} className="shrink-0 mt-0.5" />
                 <p className="flex-1">
                   <strong>Demo Mode</strong>: No <code>GEMINI_API_KEY</code> set in .env. Running on mock replies.
@@ -394,11 +394,11 @@ export function ChatbotPage() {
                   </div>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-gray-900 mt-2">
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-gray-900 dark:text-white mt-2">
                   Your smart AI buddy for all things digital
                 </h1>
                 
-                <p className="mt-2 text-xs font-semibold text-gray-400">
+                <p className="mt-2 text-xs font-semibold text-gray-400 dark:text-gray-400">
                   Ask AI anything with SkillShare
                 </p>
                 
@@ -408,7 +408,7 @@ export function ChatbotPage() {
                     <button
                       key={prompt}
                       onClick={() => handleSend(prompt)}
-                      className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-150 border border-gray-200/80 rounded-xl px-4 py-2.5 text-[11px] font-bold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm"
+                      className="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-gray-900 hover:bg-gray-150 dark:hover:bg-gray-800 border border-gray-200/80 dark:border-gray-800 rounded-xl px-4 py-2.5 text-[11px] font-bold text-gray-800 dark:text-gray-200 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm"
                     >
                       {prompt}
                     </button>
@@ -429,7 +429,7 @@ export function ChatbotPage() {
                       <div className={`h-8 w-8 grid place-items-center rounded-xl text-xs font-bold shrink-0 shadow-sm border ${
                         isUser
                           ? 'bg-blue-600 text-white border-blue-500'
-                          : 'bg-white text-blue-600 border-gray-200'
+                          : 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 border-gray-200 dark:border-gray-800'
                       }`}>
                         {isUser ? user?.name?.[0]?.toUpperCase() || 'U' : <Bot size={16} />}
                       </div>
@@ -440,7 +440,7 @@ export function ChatbotPage() {
                           className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
                             isUser
                               ? 'bg-blue-600 text-white rounded-tr-none'
-                              : 'bg-white text-gray-800 border border-gray-200 rounded-tl-none'
+                              : 'bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-800 rounded-tl-none'
                           }`}
                         >
                           {isUser ? (
@@ -451,7 +451,7 @@ export function ChatbotPage() {
                             </div>
                           )}
                         </div>
-                        <span className={`text-[10px] text-gray-400 mt-1.5 px-1 ${isUser ? 'text-right' : ''}`}>
+                        <span className={`text-[10px] text-gray-400 dark:text-gray-500 mt-1.5 px-1 ${isUser ? 'text-right' : ''}`}>
                           {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
@@ -462,10 +462,10 @@ export function ChatbotPage() {
                 {/* Loader animation */}
                 {loading && (
                   <div className="flex gap-4 items-start animate-pulse">
-                    <div className="h-8 w-8 grid place-items-center rounded-xl bg-white text-blue-600 border border-gray-200 shrink-0 shadow-sm">
+                    <div className="h-8 w-8 grid place-items-center rounded-xl bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 border border-gray-200 dark:border-gray-800 shrink-0 shadow-sm">
                       <Bot size={16} />
                     </div>
-                    <div className="bg-white text-gray-800 border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-none shadow-sm">
+                    <div className="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-800 px-4 py-3 rounded-2xl rounded-tl-none shadow-sm">
                       <div className="flex gap-1 items-center h-4 py-1">
                         <span className="w-1.5 h-1.5 bg-blue-450 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                         <span className="w-1.5 h-1.5 bg-blue-450 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
@@ -482,7 +482,7 @@ export function ChatbotPage() {
         </div>
 
         {/* Input box footer */}
-        <div className="p-4 bg-white border-t border-gray-100 shrink-0 select-none">
+        <div className="p-4 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 shrink-0 select-none">
           <div className="max-w-2xl mx-auto w-full flex flex-col items-center gap-2">
             
             {/* Quick suggestion pills (visible when history is active) */}
@@ -493,7 +493,7 @@ export function ChatbotPage() {
                     key={prompt}
                     onClick={() => handleSend(prompt)}
                     disabled={loading}
-                    className="text-[10px] bg-white hover:bg-gray-50 border border-gray-250 text-gray-600 rounded-full px-3 py-1.5 transition-all cursor-pointer disabled:opacity-50 shrink-0 shadow-sm"
+                    className="text-[10px] bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-250 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-full px-3 py-1.5 transition-all cursor-pointer disabled:opacity-50 shrink-0 shadow-sm"
                   >
                     {prompt}
                   </button>
@@ -502,14 +502,14 @@ export function ChatbotPage() {
             )}
 
             {/* Recreated Input Bar (decorations + teal submit button matching Alibble) */}
-            <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="w-full flex items-center border border-gray-250 rounded-2xl pl-3.5 pr-2 py-1.5 bg-white shadow-sm focus-within:ring-2 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all">
+            <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="w-full flex items-center border border-gray-250 dark:border-gray-700 rounded-2xl pl-3.5 pr-2 py-1.5 bg-white dark:bg-gray-900 shadow-sm focus-within:ring-2 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all">
               
               {/* Decorative actions (plus and mic icons on the left, matching Alibble layout) */}
-              <div className="flex items-center gap-1.5 text-gray-400 shrink-0 mr-1.5">
-                <button type="button" className="p-1 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+              <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 shrink-0 mr-1.5">
+                <button type="button" className="p-1 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer">
                   <Plus size={16} />
                 </button>
-                <div className="w-[1px] h-4 bg-gray-200"></div>
+                <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700"></div>
               </div>
 
               <input
@@ -518,7 +518,7 @@ export function ChatbotPage() {
                 onChange={(e) => setInputText(e.target.value)}
                 disabled={loading}
                 placeholder="Type a prompt... Write responsive pixel perfect code."
-                className="flex-1 bg-transparent border-none text-sm text-gray-800 placeholder-gray-450 focus:outline-none py-2 disabled:opacity-50"
+                className="flex-1 bg-transparent border-none text-sm text-gray-800 dark:text-gray-100 placeholder-gray-450 dark:placeholder-gray-500 focus:outline-none py-2 disabled:opacity-50"
               />
               
               {/* Send Button: Recreated as solid teal rounded box */}
@@ -531,7 +531,7 @@ export function ChatbotPage() {
               </button>
             </form>
 
-            <span className="text-[10px] text-gray-400 mt-1">
+            <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
               SkillShare AI buddy. Double-check important coding concepts.
             </span>
           </div>
