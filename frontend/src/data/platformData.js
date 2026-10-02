@@ -3,6 +3,7 @@ import {
   Award,
   BookOpen,
   BriefcaseBusiness,
+  ClipboardList,
   CreditCard,
   GraduationCap,
   LayoutDashboard,
@@ -127,6 +128,7 @@ export const stats = [
 export const studentLinks = [
   ['Overview', '/dashboard/student', LayoutDashboard],
   ['My Courses', '/dashboard/student/my-courses', BookOpen],
+  ['Quiz Results', '/dashboard/student/quiz-results', ClipboardList],
   ['My Certificates', '/dashboard/student/certificates', Award],
   ['Profile Settings', '/dashboard/student/profile', Settings]
 ];
@@ -145,6 +147,7 @@ export const adminLinks = [
   ['Overview', '/dashboard/admin', LayoutDashboard],
   ['Manage Users', '/dashboard/admin/users', Users],
   ['Manage Courses', '/dashboard/admin/courses', BookOpen],
+  ['Manage Quizzes', '/dashboard/admin/quizzes', ClipboardList],
   ['Manage Instructors', '/dashboard/admin/instructors', GraduationCap],
   ['Manage Payments', '/dashboard/admin/payments', CreditCard],
   ['Categories', '/dashboard/admin/categories', BriefcaseBusiness],
