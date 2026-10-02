@@ -12,8 +12,17 @@ function QuizView({ quiz, courseId, onQuizComplete }) {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [remainingSeconds, setRemainingSeconds] = useState(null);
+  const [now, setNow] = useState(Date.now());
   const [error, setError] = useState('');
   const submittedRef = useRef(false);
+
+  useEffect(() => {
+    const clock = window.setInterval(() => setNow(Date.now()), 15000);
+    return () => window.clearInterval(clock);
+  }, []);
+
+  const isNotOpen = quiz.startsAt && now < new Date(quiz.startsAt).getTime();
+  const isClosed = quiz.endsAt && now > new Date(quiz.endsAt).getTime();
 
   const submitAttempt = useCallback(async () => {
     if (!attempt || submittedRef.current) return;
@@ -50,6 +59,9 @@ function QuizView({ quiz, courseId, onQuizComplete }) {
     setSubmitting(true);
     try {
       const started = await courseApi.startQuizAttempt(courseId, quiz._id);
+      if (!Array.isArray(started?.questions) || started.questions.some((question) => !Array.isArray(question.options))) {
+        throw new Error('The quiz could not be loaded. Refresh the page and try again.');
+      }
       submittedRef.current = false;
       setAnswers({});
       setResult(null);
@@ -94,8 +106,10 @@ function QuizView({ quiz, courseId, onQuizComplete }) {
         <p className="mt-1 text-sm text-gray-600">Time limit: {quiz.timeLimitMinutes ? `${quiz.timeLimitMinutes} minutes` : 'None'} · Attempts: {quiz.attemptLimit || 'Unlimited'}</p>
         {quiz.startsAt && <p className="mt-1 text-sm text-gray-600">Opens {new Date(quiz.startsAt).toLocaleString()}</p>}
         {quiz.endsAt && <p className="mt-1 text-sm text-gray-600">Closes {new Date(quiz.endsAt).toLocaleString()}</p>}
+        {isNotOpen && <p className="mt-3 text-sm font-semibold text-amber-700">This quiz has not opened yet.</p>}
+        {isClosed && <p className="mt-3 text-sm font-semibold text-red-700">This quiz submission window has ended.</p>}
         {error && <p role="alert" className="mt-4 rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p>}
-        <Button className="mt-5" onClick={startAttempt} disabled={submitting}>
+        <Button className="mt-5" onClick={startAttempt} disabled={submitting || isNotOpen || isClosed}>
           {submitting ? 'Starting...' : 'Start Quiz'}
         </Button>
       </div>
