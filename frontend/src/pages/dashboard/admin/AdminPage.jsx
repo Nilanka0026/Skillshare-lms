@@ -4,6 +4,7 @@ import { DashboardCard } from '../../../components/common/DashboardCard.jsx';
 import { FormInput } from '../../../components/common/FormInput.jsx';
 import { courseApi, orderApi, userApi, authApi } from '../../../services/api.js';
 import { formatCurrency } from '../../../utils/formatters.js';
+import { QuizManager } from '../../../components/dashboard/QuizManager.jsx';
 
 export function AdminPage({ title, view }) {
   const [users, setUsers] = useState([]);
@@ -420,6 +421,7 @@ export function AdminPage({ title, view }) {
       {view === 'overview' && <Overview users={users} courses={courses} instructors={stats.instructors} payments={stats.payments} />}
       {view === 'users' && <UsersTable users={users} onDeleteUser={handleDeleteUser} />}
       {view === 'courses' && <CoursesTable courses={courses} onDeleteCourse={handleDeleteCourse} />}
+      {view === 'quizzes' && <AdminQuizManagement />}
       {view === 'instructors' && <InstructorsTable users={users.filter((user) => user.role === 'instructor')} onDeleteUser={handleDeleteUser} onVerifyInstructor={handleVerifyInstructor} />}
       {view === 'payments' && <OrdersTable orders={orders} />}
       {view === 'categories' && (
@@ -432,6 +434,53 @@ export function AdminPage({ title, view }) {
       {view === 'reports' && <Reports users={users} courses={courses} orders={orders} />}
       {view === 'settings' && <SettingsPanel />}
     </div>
+  );
+}
+
+function AdminQuizManagement() {
+  const [courses, setCourses] = useState([]);
+  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    courseApi.adminQuizzes()
+      .then((items) => {
+        setCourses(items);
+        if (items.length) setSelectedCourseId(items[0]._id);
+      })
+      .catch((apiError) => setError(apiError.message || 'Unable to load quizzes.'))
+      .finally(() => setLoadingCourses(false));
+  }, []);
+
+  const selectedCourse = courses.find((course) => course._id === selectedCourseId);
+
+  return (
+    <section className="max-w-5xl space-y-5">
+      <div>
+        <h2 className="text-xl font-black text-gray-950">Course quiz management</h2>
+        <p className="mt-1 text-sm text-gray-600">Manage quizzes and review student attempts across the platform.</p>
+      </div>
+      {error && <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p>}
+      {loadingCourses ? <p className="text-sm text-gray-500">Loading courses...</p> : courses.length ? (
+        <label className="block max-w-xl space-y-1.5 text-sm font-bold text-gray-700">
+          Select course
+          <select value={selectedCourseId} onChange={(event) => setSelectedCourseId(event.target.value)} className="w-full rounded-md border border-gray-300 bg-white px-3 py-2.5">
+            {courses.map((course) => <option key={course._id} value={course._id}>{course.title} · {course.instructor?.name || 'Unknown instructor'}</option>)}
+          </select>
+        </label>
+      ) : !error ? <p className="rounded-md border border-gray-200 bg-white p-4 text-sm text-gray-600">No courses are available to manage.</p> : null}
+      {selectedCourse && (
+        <QuizManager
+          key={selectedCourse._id}
+          courseId={selectedCourse._id}
+          quizzes={selectedCourse.quizzes || []}
+          onChange={(quizzes) => setCourses((current) => current.map((course) => (
+            course._id === selectedCourse._id ? { ...course, quizzes } : course
+          )))}
+        />
+      )}
+    </section>
   );
 }
 

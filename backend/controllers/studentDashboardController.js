@@ -1,5 +1,6 @@
 const Enrollment = require('../models/Enrollment');
 const asyncHandler = require('../utils/asyncHandler');
+const { sanitizeCourseQuizzes } = require('./quizController');
 
 // @desc    Get student enrolled courses with progress
 // @route   GET /api/student/my-courses
@@ -17,7 +18,7 @@ const getStudentCourses = asyncHandler(async (req, res) => {
   const coursesWithProgress = enrollments
     .filter(enrollment => enrollment.course)
     .map(enrollment => {
-      const courseObj = enrollment.course.toObject();
+      const courseObj = sanitizeCourseQuizzes(enrollment.course);
       return {
         ...courseObj,
         progress: enrollment.progress || 0,

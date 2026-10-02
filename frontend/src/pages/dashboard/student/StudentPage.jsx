@@ -7,7 +7,7 @@ import { Toast } from '../../../components/common/Toast.jsx';
 import { courses as mockCourses } from '../../../data/platformData.js';
 import { useCourse } from '../../../context/CourseContext.jsx';
 import { useAuth } from '../../../context/useAuth.js';
-import { authApi, certificateApi } from '../../../services/api.js';
+import { authApi, certificateApi, courseApi } from '../../../services/api.js';
 import { Link } from 'react-router-dom';
 import { StudyCalendar } from '../../../components/dashboard/StudyCalendar.jsx';
 
@@ -48,6 +48,7 @@ export function StudentPage({ title, view }) {
       
       {view === 'overview' && <Overview myCourses={displayedCourses} />}
       {view === 'courses' && <CourseGrid courses={displayedCourses} title="My Enrolled Courses" onUnenroll={handleUnenroll} />}
+      {view === 'quiz-results' && <StudentQuizResults />}
       {view === 'wishlist' && <CourseGrid courses={mockCourses.slice(1, 3)} title="Wishlist" onUnenroll={() => {}} />}
       {view === 'certificates' && <Certificates />}
       {view === 'notifications' && <Notifications />}
@@ -206,6 +207,61 @@ function Certificates() {
           </div>
         </article>
       ))}
+    </div>
+  );
+}
+
+function StudentQuizResults() {
+  const [attempts, setAttempts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [expandedAttemptId, setExpandedAttemptId] = useState(null);
+
+  useEffect(() => {
+    courseApi.studentQuizAttempts()
+      .then(setAttempts)
+      .catch((apiError) => setError(apiError.message || 'Unable to load quiz results.'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p className="text-sm font-semibold text-gray-500">Loading quiz results...</p>;
+  if (error) return <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p>;
+  if (!attempts.length) return <p className="rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-600">Your submitted quiz attempts and results will appear here.</p>;
+
+  return (
+    <div className="max-w-4xl space-y-4">
+      {attempts.map((attempt) => {
+        const expanded = expandedAttemptId === attempt._id;
+        return (
+          <article key={attempt._id} className="rounded-lg border border-gray-200 bg-white p-5">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h2 className="font-black text-gray-950">{attempt.quizTitle}</h2>
+                <p className="mt-1 text-sm text-gray-600">{attempt.course?.title || 'Course'} · Attempt {attempt.attemptNumber}</p>
+                <p className="mt-1 text-xs text-gray-500">Submitted {attempt.submittedAt ? new Date(attempt.submittedAt).toLocaleString() : 'Not submitted'}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-black text-gray-950">{attempt.score} / {attempt.totalMarks} · {attempt.percentage}%</p>
+                <p className={`text-sm font-bold ${attempt.passed ? 'text-emerald-700' : 'text-amber-800'}`}>{attempt.passed ? 'Passed' : 'Not passed'} · pass mark {attempt.passMark}%</p>
+              </div>
+            </div>
+            <button type="button" onClick={() => setExpandedAttemptId(expanded ? null : attempt._id)} className="mt-4 text-sm font-bold text-teal-800 hover:underline">
+              {expanded ? 'Hide answers' : 'Review answers'}
+            </button>
+            {expanded && (
+              <div className="mt-4 space-y-3 border-t border-gray-200 pt-4">
+                {attempt.questions.map((question, index) => (
+                  <div key={question._id || question.questionId || index} className="rounded-md bg-gray-50 p-4">
+                    <p className="font-bold text-gray-900">{index + 1}. {question.questionText} ({question.marks} marks)</p>
+                    <p className="mt-2 text-sm text-gray-700">Your answer: {question.selectedAnswerIndex === null ? 'No answer' : question.options[question.selectedAnswerIndex]}</p>
+                    <p className="text-sm font-semibold text-emerald-800">Correct answer: {question.options[question.correctAnswerIndex]}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </article>
+        );
+      })}
     </div>
   );
 }
