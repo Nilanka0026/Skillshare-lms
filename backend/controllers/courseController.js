@@ -4,6 +4,7 @@ const Review = require('../models/Review');
 const Enrollment = require('../models/Enrollment');
 const asyncHandler = require('../utils/asyncHandler');
 const updateCourseProgress = require('../utils/courseProgress');
+const { sanitizeCourseQuizzes } = require('./quizController');
 
 const getCourses = asyncHandler(async (req, res) => {
   const { category, search } = req.query;
@@ -45,7 +46,7 @@ const getCourses = asyncHandler(async (req, res) => {
     courses = Array.from(combinedMap.values());
   }
 
-  res.json(courses);
+  res.json(courses.map(sanitizeCourseQuizzes));
 });
 
 const getCourseById = asyncHandler(async (req, res) => {
@@ -61,7 +62,7 @@ const getCourseById = asyncHandler(async (req, res) => {
 
   const reviews = await Review.find({ courseId: course._id }).populate('userId', 'name profileImage');
 
-  res.json({ course, reviews });
+  res.json({ course: sanitizeCourseQuizzes(course), reviews });
 });
 
 const getMyCourses = asyncHandler(async (req, res) => {
@@ -74,7 +75,7 @@ const getMyCourses = asyncHandler(async (req, res) => {
     .populate('instructor', 'name email profileImage bio skills experience')
     .populate('lessons');
 
-  res.json(courses);
+  res.json(courses.map(sanitizeCourseQuizzes));
 });
 
 const createCourse = asyncHandler(async (req, res) => {
@@ -239,40 +240,6 @@ const removeLesson = asyncHandler(async (req, res) => {
   res.json({ message: 'Lesson removed successfully' });
 });
 
-const addQuiz = asyncHandler(async (req, res) => {
-  const course = await Course.findById(req.params.id);
-  
-  if (!course) {
-    res.status(404);
-    throw new Error('Course not found');
-  }
-
-  if (course.instructor.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-    res.status(403);
-    throw new Error('Forbidden: you can only add quizzes to your own courses');
-  }
-
-  const { title, questions } = req.body;
-  if (!title || !questions || !Array.isArray(questions)) {
-    res.status(400);
-    throw new Error('Please provide a quiz title and a valid array of questions');
-  }
-
-  const newQuiz = {
-    title,
-    questions: questions.map(q => ({
-      questionText: q.questionText,
-      options: q.options,
-      correctAnswerIndex: Number(q.correctAnswerIndex)
-    }))
-  };
-
-  course.quizzes.push(newQuiz);
-  await course.save();
-
-  res.status(201).json(course.quizzes[course.quizzes.length - 1]);
-});
-
 const submitQuiz = asyncHandler(async (req, res) => {
   const { id, quizId } = req.params;
   const { answers } = req.body;
@@ -348,6 +315,5 @@ module.exports = {
   getMyCourses,
   removeLesson,
   updateCourse,
-  submitQuiz,
-  addQuiz
+  submitQuiz
 };

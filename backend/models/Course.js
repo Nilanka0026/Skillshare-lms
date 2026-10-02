@@ -92,14 +92,26 @@ const courseSchema = new mongoose.Schema(
     },
     quizzes: [
       {
-        title: { type: String, required: true },
+        title: { type: String, required: true, trim: true },
         questions: [
           {
-            questionText: { type: String, required: true },
-            options: [{ type: String, required: true }],
-            correctAnswerIndex: { type: Number, required: true }
+            questionText: { type: String, required: true, trim: true },
+            questionType: {
+              type: String,
+              enum: ['multiple-choice', 'true-false'],
+              default: 'multiple-choice'
+            },
+            options: [{ type: String, required: true, trim: true }],
+            correctAnswerIndex: { type: Number, required: true, min: 0 },
+            marks: { type: Number, default: 1, min: 0.01 }
           }
-        ]
+        ],
+        passMark: { type: Number, default: 50, min: 0, max: 100 },
+        timeLimitMinutes: { type: Number, default: null, min: 1 },
+        attemptLimit: { type: Number, default: null, min: 1 },
+        startsAt: { type: Date, default: null },
+        endsAt: { type: Date, default: null },
+        isPublished: { type: Boolean, default: true }
       }
     ]
   },

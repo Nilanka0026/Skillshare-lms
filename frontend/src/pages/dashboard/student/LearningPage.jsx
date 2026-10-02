@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, PlayCircle, Star, CheckCircle, MessageSquare, FileText } from 'lucide-react';
 import { Button } from '../../../components/common/Button.jsx';
@@ -6,90 +6,130 @@ import { VideoPlayer } from '../../../components/common/VideoPlayer.jsx';
 import { courseApi, enrollmentApi } from '../../../services/api.js';
 import courseService from '../../../services/courseService.js';
 
-function QuizView({ quiz, courseId, enrollment, onQuizComplete }) {
+function QuizView({ quiz, courseId, onQuizComplete }) {
+  const [attempt, setAttempt] = useState(null);
   const [answers, setAnswers] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
+  const [remainingSeconds, setRemainingSeconds] = useState(null);
+  const [error, setError] = useState('');
+  const submittedRef = useRef(false);
+
+  const submitAttempt = useCallback(async () => {
+    if (!attempt || submittedRef.current) return;
+    submittedRef.current = true;
+    setSubmitting(true);
+    setError('');
+    try {
+      const answerList = attempt.questions.map((_, index) => answers[index] ?? null);
+      const attemptResult = await courseApi.submitQuizAttempt(courseId, quiz._id, attempt.attemptId, answerList);
+      setResult(attemptResult);
+      onQuizComplete?.();
+    } catch (apiError) {
+      submittedRef.current = false;
+      setError(apiError.message || 'Unable to submit this attempt.');
+    } finally {
+      setSubmitting(false);
+    }
+  }, [answers, attempt, courseId, onQuizComplete, quiz._id]);
 
   useEffect(() => {
-    if (result && result.results) return;
-    
-    const existing = enrollment?.quizResults?.find(r => r.quizId === quiz._id);
-    if (existing) {
-      setResult({ score: existing.score, total: existing.total, alreadyTaken: true });
-    } else {
-      setResult(null);
-      setAnswers({});
-    }
-  }, [quiz, enrollment]);
+    if (!attempt?.deadlineAt || result) return undefined;
+    const timer = window.setInterval(() => {
+      setRemainingSeconds(Math.max(0, Math.ceil((new Date(attempt.deadlineAt).getTime() - Date.now()) / 1000)));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [attempt, result]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (remainingSeconds === 0 && !result) submitAttempt();
+  }, [remainingSeconds, result, submitAttempt]);
+
+  const startAttempt = async () => {
+    setError('');
     setSubmitting(true);
     try {
-      const answersArray = quiz.questions.map((q, i) => answers[i] ?? -1);
-      const res = await courseApi.submitQuiz(courseId, quiz._id, answersArray);
-      setResult(res.data || res);
-      if (onQuizComplete) onQuizComplete();
-    } catch (err) {
-      alert('Error submitting quiz');
+      const started = await courseApi.startQuizAttempt(courseId, quiz._id);
+      submittedRef.current = false;
+      setAnswers({});
+      setResult(null);
+      setAttempt(started);
+      setRemainingSeconds(started.deadlineAt
+        ? Math.max(0, Math.ceil((new Date(started.deadlineAt).getTime() - Date.now()) / 1000))
+        : null);
+    } catch (apiError) {
+      setError(apiError.message || 'Unable to start this quiz.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (result && result.alreadyTaken && !result.results) {
+  if (result?.questions) {
     return (
       <div className="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
-        <h2 className="text-2xl font-black text-gray-950 mb-4">{quiz.title}</h2>
-        <div className="bg-green-50 text-green-800 border border-green-200 p-4 rounded-xl font-bold">
-          You have already completed this quiz. Score: {result.score} / {result.total}
+        <h2 className="text-2xl font-black text-gray-950 mb-4">{quiz.title} · Attempt {result.attemptNumber}</h2>
+        <div className={`mb-6 rounded-xl border p-4 text-lg font-black ${result.passed ? 'border-green-200 bg-green-50 text-green-800' : 'border-amber-200 bg-amber-50 text-amber-900'}`}>
+          {result.passed ? 'Passed' : 'Not passed'} · {result.score} / {result.totalMarks} marks · {result.percentage}% (pass mark {result.passMark}%)
         </div>
+        <div className="space-y-6">
+          {result.questions.map((question, index) => (
+            <div key={question._id || index} className={`p-5 rounded-xl border ${question.isCorrect ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}>
+              <p className="font-bold text-gray-900 mb-3">{index + 1}. {question.questionText} ({question.marks} marks)</p>
+              <p className="text-sm font-semibold">Your answer: {question.selectedAnswerIndex === null ? 'No answer' : question.options[question.selectedAnswerIndex]}</p>
+              <p className="mt-1 text-sm font-bold text-green-700">Correct answer: {question.options[question.correctAnswerIndex]}</p>
+            </div>
+          ))}
+        </div>
+        {result.status === 'timed-out' && <p className="mt-5 text-sm font-semibold text-amber-800">This attempt was submitted after its time limit.</p>}
       </div>
     );
   }
 
-  if (result && result.results) {
+  if (!attempt) {
+    const totalMarks = quiz.questions.reduce((sum, question) => sum + Number(question.marks || 1), 0);
     return (
-      <div className="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
-        <h2 className="text-2xl font-black text-gray-950 mb-4">{quiz.title} - Results</h2>
-        <div className="bg-blue-50 text-blue-800 border border-blue-200 p-4 rounded-xl mb-6 text-lg font-black">
-          Your Score: {result.score} / {result.total}
-        </div>
-        <div className="space-y-6">
-          {result.results.map((r, i) => (
-            <div key={i} className={`p-5 rounded-xl border ${r.isCorrect ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}>
-              <p className="font-bold text-gray-900 mb-3">{i + 1}. {r.questionText}</p>
-              <p className="text-sm font-semibold">Your answer: <span className={r.isCorrect ? 'text-green-700' : 'text-red-600'}>{r.userAnswerIndex !== -1 ? r.options[r.userAnswerIndex] : 'None'}</span></p>
-              {!r.isCorrect && (
-                <p className="font-bold text-green-700 mt-2">Correct answer: {r.options[r.correctAnswerIndex]}</p>
-              )}
-            </div>
-          ))}
-        </div>
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-black text-gray-950">{quiz.title}</h2>
+        <p className="mt-3 text-sm text-gray-600">{quiz.questions.length} questions · {totalMarks} marks · Pass mark {quiz.passMark ?? 50}%</p>
+        <p className="mt-1 text-sm text-gray-600">Time limit: {quiz.timeLimitMinutes ? `${quiz.timeLimitMinutes} minutes` : 'None'} · Attempts: {quiz.attemptLimit || 'Unlimited'}</p>
+        {quiz.startsAt && <p className="mt-1 text-sm text-gray-600">Opens {new Date(quiz.startsAt).toLocaleString()}</p>}
+        {quiz.endsAt && <p className="mt-1 text-sm text-gray-600">Closes {new Date(quiz.endsAt).toLocaleString()}</p>}
+        {error && <p role="alert" className="mt-4 rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p>}
+        <Button className="mt-5" onClick={startAttempt} disabled={submitting}>
+          {submitting ? 'Starting...' : 'Start Quiz'}
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
-      <h2 className="text-2xl font-black text-gray-950 mb-6">{quiz.title}</h2>
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {quiz.questions.map((q, i) => (
-          <div key={i} className="bg-gray-50 p-5 rounded-xl border border-gray-100">
-            <p className="font-bold text-gray-900 mb-4">{i + 1}. {q.questionText}</p>
-            <div className="space-y-2.5">
-              {q.options.map((opt, j) => (
-                <label key={j} className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl hover:bg-white cursor-pointer transition">
-                  <input type="radio" name={`question-${i}`} checked={answers[i] === j} onChange={() => setAnswers(prev => ({ ...prev, [i]: j }))} className="w-4 h-4 text-blue-600" />
-                  <span className="font-semibold text-gray-700">{opt}</span>
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-black text-gray-950">{quiz.title}</h2>
+          <p className="mt-1 text-sm text-gray-600">Attempt {attempt.attemptNumber}</p>
+        </div>
+        {remainingSeconds !== null && <p aria-live="polite" className={`font-mono text-lg font-black ${remainingSeconds < 60 ? 'text-red-700' : 'text-gray-800'}`}>
+          {Math.floor(remainingSeconds / 60).toString().padStart(2, '0')}:{(remainingSeconds % 60).toString().padStart(2, '0')}
+        </p>}
+      </div>
+      {error && <p role="alert" className="mb-4 rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p>}
+      <form onSubmit={(event) => { event.preventDefault(); submitAttempt(); }} className="space-y-6">
+        {attempt.questions.map((question, questionIndex) => (
+          <fieldset key={question._id || questionIndex} className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+            <legend className="px-1 font-bold text-gray-900">{questionIndex + 1}. {question.questionText} <span className="text-xs font-semibold text-gray-500">({question.marks} marks)</span></legend>
+            <div className="mt-3 space-y-2">
+              {question.options.map((option, optionIndex) => (
+                <label key={optionIndex} className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 hover:border-teal-700">
+                  <input type="radio" name={`question-${questionIndex}`} checked={answers[questionIndex] === optionIndex} onChange={() => setAnswers((current) => ({ ...current, [questionIndex]: optionIndex }))} disabled={submitting || remainingSeconds === 0} className="h-4 w-4 text-teal-700" />
+                  <span className="font-semibold text-gray-700">{option}</span>
                 </label>
               ))}
             </div>
-          </div>
+          </fieldset>
         ))}
-        <Button type="submit" disabled={submitting || Object.keys(answers).length < quiz.questions.length}>
-          {submitting ? 'Submitting...' : 'Submit Quiz'}
+        <Button type="submit" disabled={submitting}>
+          {submitting ? 'Submitting...' : 'Submit Answers'}
         </Button>
       </form>
     </div>
@@ -101,6 +141,7 @@ export function LearningPage() {
   const [course, setCourse] = useState(null);
   const [activeItem, setActiveItem] = useState(null); // { type: 'lesson' | 'quiz', data: any }
   const [enrollment, setEnrollment] = useState(null);
+  const [quizAttempts, setQuizAttempts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [rating, setRating] = useState(5);
@@ -125,6 +166,9 @@ export function LearningPage() {
           const enrollData = await enrollmentApi.checkStatus(courseId);
           setEnrollment(enrollData.data || enrollData);
         } catch (e) { console.error('Not enrolled or error fetching enrollment', e); }
+        try {
+          setQuizAttempts(await courseApi.studentQuizAttempts());
+        } catch (e) { console.error('Unable to load quiz attempts', e); }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -193,7 +237,13 @@ export function LearningPage() {
     }
   };
 
-  const completedQuizzesCount = enrollment?.quizResults?.length || 0;
+  const completedQuizIds = new Set([
+    ...(enrollment?.quizResults || []).map((result) => String(result.quizId)),
+    ...quizAttempts
+      .filter((attempt) => String(attempt.course?._id || attempt.course) === String(course._id))
+      .map((attempt) => String(attempt.quizId))
+  ]);
+  const completedQuizzesCount = completedQuizIds.size;
   const completedLessonsCount = enrollment?.completedLessons?.length || 0;
   const totalItems = allItems.length;
   let progressPercent = 0;
@@ -248,7 +298,7 @@ export function LearningPage() {
               </div>
             </>
           ) : activeItem?.type === 'quiz' ? (
-            <QuizView quiz={activeItem.data} courseId={course._id} enrollment={enrollment} onQuizComplete={fetchDetails} />
+            <QuizView quiz={activeItem.data} courseId={course._id} onQuizComplete={fetchDetails} />
           ) : (
             <div className="p-10 text-center bg-gray-50 rounded-2xl border font-bold text-gray-500">No content selected</div>
           )}
@@ -338,7 +388,7 @@ export function LearningPage() {
                 const isActive = activeItem?.data?._id === item.data._id;
                 let isCompleted = false;
                 if (isQuiz) {
-                  isCompleted = enrollment?.quizResults?.some(r => r.quizId === item.data._id);
+                  isCompleted = completedQuizIds.has(String(item.data._id));
                 } else {
                   isCompleted = enrollment?.completedLessons?.includes(item.data._id);
                 }

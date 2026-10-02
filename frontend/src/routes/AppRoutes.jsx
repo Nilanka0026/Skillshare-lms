@@ -68,6 +68,7 @@ export function AppRoutes() {
             <Route index element={<StudentPage title="Student Dashboard" view="overview" />} />
             <Route path="my-courses" element={<StudentPage title="My Courses" view="courses" />} />
             <Route path="learning/:courseId" element={<LearningPage />} />
+            <Route path="quiz-results" element={<StudentPage title="Quiz Results" view="quiz-results" />} />
             <Route path="wishlist" element={<StudentPage title="Wishlist" view="wishlist" />} />
             <Route path="certificates" element={<StudentPage title="Certificates" view="certificates" />} />
             <Route path="notifications" element={<StudentPage title="Notifications" view="notifications" />} />
@@ -93,6 +94,7 @@ export function AppRoutes() {
             <Route index element={<AdminPage title="Admin Dashboard" view="overview" />} />
             <Route path="users" element={<AdminPage title="Manage Users" view="users" />} />
             <Route path="courses" element={<AdminPage title="Manage Courses" view="courses" />} />
+            <Route path="quizzes" element={<AdminPage title="Manage Quizzes" view="quizzes" />} />
             <Route path="instructors" element={<AdminPage title="Manage Instructors" view="instructors" />} />
             <Route path="payments" element={<AdminPage title="Manage Payments" view="payments" />} />
             <Route path="categories" element={<AdminPage title="Categories" view="categories" />} />
