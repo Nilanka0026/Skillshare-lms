@@ -1,8 +1,10 @@
-import apiClient from './apiClient';
+import apiClient, { SERVER_BASE_URL } from './apiClient';
 import authService from './authService';
 import courseService from './courseService';
 import adminService from './adminService';
 import { enrollmentService } from './enrollmentService';
+
+export { SERVER_BASE_URL };
 
 export const authApi = {
   login: (payload) => authService.login(payload),

@@ -4,7 +4,7 @@ import { DashboardCard } from '../../../components/common/DashboardCard.jsx';
 import { FormInput } from '../../../components/common/FormInput.jsx';
 import { useAuth } from '../../../context/useAuth.js';
 import { categories } from '../../../data/platformData.js';
-import { courseApi, authApi } from '../../../services/api.js';
+import { courseApi, authApi, SERVER_BASE_URL } from '../../../services/api.js';
 import { formatCurrency } from '../../../utils/formatters.js';
 import { QuizManager } from '../../../components/dashboard/QuizManager.jsx';
 
@@ -745,7 +745,7 @@ function ProfileSettings({ initialUser }) {
     setUploading(true);
     try {
       const uploadRes = await authApi.uploadImage(file);
-      const imageUrl = `http://localhost:5000${uploadRes.data || uploadRes}`; 
+      const imageUrl = `${SERVER_BASE_URL}${uploadRes.data || uploadRes}`; 
       const updatedUser = await authApi.updateProfile({ profileImage: imageUrl });
       updateUser(updatedUser.data || updatedUser);
       alert('Profile picture updated successfully!');
@@ -835,7 +835,7 @@ function ManageLessons({ course, onBack, onError, onSuccess }) {
     setUploading(true);
     try {
       const uploadRes = await courseApi.uploadVideo(videoFile);
-      const videoUrl = `http://localhost:5000${uploadRes}`; 
+      const videoUrl = `${SERVER_BASE_URL}${uploadRes}`; 
       const lessonRes = await courseApi.addLesson(course._id, {
         title: lessonData.title,
         duration: lessonData.duration,

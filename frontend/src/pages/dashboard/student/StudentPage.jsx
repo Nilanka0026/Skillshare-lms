@@ -7,7 +7,7 @@ import { Toast } from '../../../components/common/Toast.jsx';
 import { courses as mockCourses } from '../../../data/platformData.js';
 import { useCourse } from '../../../context/CourseContext.jsx';
 import { useAuth } from '../../../context/useAuth.js';
-import { authApi, certificateApi, courseApi } from '../../../services/api.js';
+import { authApi, certificateApi, courseApi, SERVER_BASE_URL } from '../../../services/api.js';
 import { Link } from 'react-router-dom';
 import { StudyCalendar } from '../../../components/dashboard/StudyCalendar.jsx';
 
@@ -280,7 +280,7 @@ function Profile({ initialUser }) {
     setUploading(true);
     try {
       const uploadRes = await authApi.uploadImage(file);
-      const imageUrl = `http://localhost:5000${uploadRes.data || uploadRes}`; 
+      const imageUrl = `${SERVER_BASE_URL}${uploadRes.data || uploadRes}`; 
       const updatedUser = await authApi.updateProfile({ profileImage: imageUrl });
       updateUser(updatedUser.data || updatedUser);
       alert('Profile picture updated successfully!');
