@@ -3,11 +3,23 @@ const multer = require('multer');
 const path = require('path');
 const { protect, authorizeRoles } = require('../middleware/authMiddleware');
 
+const os = require('os');
+const fs = require('fs');
+
 const router = express.Router();
+
+const uploadDir = process.env.VERCEL ? path.join(os.tmpdir(), 'uploads') : 'uploads/';
+if (!fs.existsSync(uploadDir)) {
+  try {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  } catch (e) {
+    console.error('Failed to create upload directory:', e);
+  }
+}
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, uploadDir);
   },
   filename(req, file, cb) {
     cb(
