@@ -23,9 +23,6 @@ const rolePrompts = {
 
 export function ChatbotWidget() {
   const { user, isAuthenticated } = useAuth();
-  
-  // Only render for logged-in users
-  if (!isAuthenticated || !user) return null;
 
   const role = user?.role === 'instructor' ? 'instructor' : user?.role === 'admin' ? 'admin' : 'student';
   const displayRole = role === 'instructor' ? 'Teacher' : role === 'admin' ? 'Admin' : 'Student';
@@ -241,6 +238,9 @@ export function ChatbotWidget() {
 
     return renderedElements;
   };
+
+  // Only render for logged-in users (checked after all hooks so hook order stays stable)
+  if (!isAuthenticated || !user) return null;
 
   return (
     <>

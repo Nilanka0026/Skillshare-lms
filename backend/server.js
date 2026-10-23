@@ -67,7 +67,7 @@ app.use('/api/certificates', require('./routes/certificateRoutes'));
 app.use('/api/chatbot', require('./routes/chatbotRoutes')); // Gemini Chatbot route
 app.use('/api/upload', require('./routes/uploadRoutes'));
 
-app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+app.use('/uploads', express.static(process.env.VERCEL ? path.join(require('os').tmpdir(), 'uploads') : path.join(__dirname, 'uploads')));
 
 
 app.use(notFound);

@@ -1,10 +1,9 @@
 const dotenv = require('dotenv');
 const path = require('path');
 
-dotenv.config({ path: path.join(__dirname, '../../backend/.env') });
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const apiKey = process.env.GEMINI_API_KEY;
-console.log('Using API key:', apiKey);
 
 if (!apiKey) {
   console.error('No GEMINI_API_KEY found in backend/.env');
