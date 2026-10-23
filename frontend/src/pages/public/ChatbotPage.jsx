@@ -25,7 +25,6 @@ const rolePrompts = {
 export function ChatbotPage() {
   const { user, logout } = useAuth();
   const role = user?.role === 'instructor' ? 'instructor' : user?.role === 'admin' ? 'admin' : 'student';
-  const displayRole = role === 'instructor' ? 'Teacher' : role === 'admin' ? 'Admin' : 'Student';
   const prompts = rolePrompts[role];
 
   const dashboardPath =

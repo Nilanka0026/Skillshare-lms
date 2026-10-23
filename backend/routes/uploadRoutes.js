@@ -8,7 +8,7 @@ const fs = require('fs');
 
 const router = express.Router();
 
-const uploadDir = process.env.VERCEL ? path.join(os.tmpdir(), 'uploads') : 'uploads/';
+const uploadDir = process.env.VERCEL ? path.join(os.tmpdir(), 'uploads') : path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadDir)) {
   try {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -32,19 +32,22 @@ const storage = multer.diskStorage({
 function checkFileType(file, cb, type) {
   let filetypes;
   if (type === 'image') {
-    filetypes = /jpg|jpeg|png|webp/;
+    filetypes = /\.(jpg|jpeg|png|webp)$/;
   } else {
-    filetypes = /mp4|mkv|webm|mov/;
+    filetypes = /\.(mp4|mkv|webm|mov)$/;
   }
-  
+
+  // .mov/.mkv report mimetypes like video/quicktime and video/x-matroska, so only check the top-level type
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
+  const mimetype = file.mimetype.startsWith(`${type}/`);
 
   if (extname && mimetype) {
     return cb(null, true);
-  } else {
-    cb(`Error: ${type === 'image' ? 'Images' : 'Videos'} only!`);
   }
+
+  const error = new Error(`${type === 'image' ? 'Images' : 'Videos'} only!`);
+  error.statusCode = 400;
+  cb(error);
 }
 
 const uploadVideo = multer({
@@ -61,12 +64,15 @@ const uploadImage = multer({
   }
 });
 
-router.post('/', protect, authorizeRoles('instructor', 'admin'), uploadVideo.single('video'), (req, res) => {
-  res.send(`/${req.file.path.replace(/\\/g, '/')}`);
-});
+const sendUploadedPath = (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded' });
+  }
+  res.send(`/uploads/${req.file.filename}`);
+};
 
-router.post('/image', protect, uploadImage.single('image'), (req, res) => {
-  res.send(`/${req.file.path.replace(/\\/g, '/')}`);
-});
+router.post('/', protect, authorizeRoles('instructor', 'admin'), uploadVideo.single('video'), sendUploadedPath);
+
+router.post('/image', protect, uploadImage.single('image'), sendUploadedPath);
 
 module.exports = router;
