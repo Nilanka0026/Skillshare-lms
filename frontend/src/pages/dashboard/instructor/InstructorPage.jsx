@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BarChart3, BookOpen, CreditCard, Star, Trash2, Users, Edit3, Eye, EyeOff, Calendar, PlayCircle, Plus, Video } from 'lucide-react';
 import { DashboardCard } from '../../../components/common/DashboardCard.jsx';
 import { FormInput } from '../../../components/common/FormInput.jsx';
@@ -24,7 +24,7 @@ export function InstructorPage({ title, view }) {
   const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [analytics, setAnalytics] = useState(null);
-  const [activeCourseId, setActiveCourseId] = useState(null);
+  const [, setActiveCourseId] = useState(null);
   const [studentData, setStudentData] = useState(null);
 
   const [editingCourse, setEditingCourse] = useState(null);
